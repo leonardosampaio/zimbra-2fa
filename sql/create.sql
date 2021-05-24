@@ -1,0 +1,10 @@
+CREATE DATABASE IF NOT EXISTS 2fa;
+CREATE USER '2fa_integration'@'localhost' IDENTIFIED BY 'q86M5Hm';
+CREATE TABLE IF NOT EXISTS 2fa.clients (
+	id 			MEDIUMINT 	NOT NULL AUTO_INCREMENT,
+	email 		CHAR(100) 	UNIQUE NOT NULL,
+	secret_key 	CHAR(100) 	NOT NULL,
+	validated 	BOOLEAN 	NOT NULL,
+	PRIMARY KEY (id)
+);
+GRANT SELECT, INSERT, UPDATE ON 2fa.clients TO '2fa_integration'@'localhost' WITH GRANT OPTION;
