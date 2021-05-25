@@ -27,13 +27,14 @@
  * Time: 2:30 PM
  * To change this template use File | Settings | File Templates.
  */
- if(ZaSettings && ZaSettings.EnabledZimlet["com_zimbra_viewmail"]){
+ if(ZaSettings && ZaSettings.EnabledZimlet["br_com_sampaio_twofa_admin"]){
+    console.log('loaded');
     ZaAccountViewMail = function () {}
     
     ZaAccountViewMail.initExtraPopupButton = function () {
         if(ZaZimbraAdmin.haveAnyTargetRight(ZaItem.ACCOUNT,ZaAccount.VIEW_MAIL_RIGHT) || ZaZimbraAdmin.haveAnyTargetRight(ZaItem.RESOURCE,ZaResource.VIEW_RESOURCE_MAIL_RIGHT)) {
             this._popupOperations[ZaOperation.VIEW_MAIL] = new ZaOperation(ZaOperation.VIEW_MAIL,
-                com_zimbra_viewmail.ACTBB_ViewMail, com_zimbra_viewmail.ACTBB_ViewMail_tt, "ReadMailbox", "ReadMailbox",
+                br_com_sampaio_twofa_admin.ACTBB_ViewMail, br_com_sampaio_twofa_admin.ACTBB_ViewMail_tt, "ReadMailbox", "ReadMailbox",
                 new AjxListener(this, ZaAccountViewMail._viewMailListener));
         }
     }
@@ -77,6 +78,8 @@
                 return;
             }
             if (account){
+                //action
+                console.log('view ' + account.name);
                 ZaAccountViewMail._viewMailListenerLauncher.call(this, account);
             }
     
