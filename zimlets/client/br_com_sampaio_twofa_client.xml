@@ -22,8 +22,10 @@
         version="1.0"
         description="Configuration of two factor authentication by users">
     <include>br_com_sampaio_twofa_client.js</include>
+    <resource>2fa.png</resource>
+    <includeCSS>br_com_sampaio_twofa_client.css</includeCSS>
     <handlerObject>br_com_sampaio_twofa_client_HandlerObject</handlerObject>
-    <zimletPanelItem label="2fa configuration" icon="zimbraIcon">
+    <zimletPanelItem label="2fa configuration" icon="2falIcon">
         <toolTipText>Click to configure two factor authentication</toolTipText>
     </zimletPanelItem>
 </zimlet>
