@@ -74,10 +74,13 @@ public class ClientDao {
 	{
 		SecretKeyWrapper result = null;
 		
-		String sql = "select secret_key, validated from clients where email = ?";
+		String sql = "select secret_key, validated from clients "
+				+ "where (lower(email) = ? or "
+				+ "lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, email);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
 		if (resultSet.next())
@@ -96,12 +99,15 @@ public class ClientDao {
 
 	public void validateSecretKey(String email, String secretKey) throws SQLException
 	{
-		String sql = "update clients set validated = true where email = ? and secret_key = ?";
+		String sql = "update clients set validated = true where "
+				+ "(lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?) "
+				+ "and secret_key = ?";
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, email);
-		preparedStatement.setString(2, secretKey);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
+		preparedStatement.setString(3, secretKey);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
@@ -109,11 +115,13 @@ public class ClientDao {
 
 	public void invalidateSecretKey(String email) throws SQLException
 	{
-		String sql = "update clients set validated = false, secret_key = null  where email = ?";
+		String sql = "update clients set validated = false, secret_key = null  "
+				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, email);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
@@ -123,10 +131,13 @@ public class ClientDao {
 	{
 		boolean result = false;
 		
-		String sql = "select validated from clients where email = ? and validated = true";
+		String sql = "select validated from clients where "
+				+ "(lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?) "
+				+ "and validated = true";
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, email);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
 		if (resultSet.next())

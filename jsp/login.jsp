@@ -18,25 +18,23 @@
 Utils utils = new Utils();
 
 String twofa = request.getParameter("2fa");
-String domain = request.getParameter("customerDomain");
-String email = request.getParameter("username");
-if (email.indexOf(trimmedUserName,'@') == -1)
-{
-	email += domain;
-}
+String username = request.getParameter("username");
 
 boolean activated = false;
 
-try {
-	activated = utils.hasValidSecretKey(email);
-}
-catch (Exception e)
+if (username != null)
 {
-	//disable 2fa in case of error
-	e.printStackTrace();
+        try {
+                activated = utils.hasValidSecretKey(username);
+        }
+        catch (Exception e)
+        {
+                //disable 2fa in case of error
+                e.printStackTrace();
+        }
 }
 
-boolean validTwoFa = (!activated || (activated && twofa != null && !twofa.isEmpty() && utils.validateCode(email, twofa)));
+boolean validTwoFa = (!activated || (activated && twofa != null && !twofa.isEmpty() && utils.validateCode(username, twofa)));
 
 %>
 
