@@ -108,6 +108,11 @@ function() {
 	oReq.send();
 };
 
+function showOkButton(show)
+{
+	document.querySelectorAll('*[id^="OK_"]')[0].style.display=(show?'block':'none');
+}
+
 function validateListener () {
 	var error = '';
 	var json = JSON.parse(this.responseText);
@@ -121,6 +126,7 @@ function validateListener () {
 
 	document.getElementById('divError').style.display = "block";
 	document.getElementById('divError').innerHTML = error;
+	showOkButton(false);
 }
 
 function qrCodeListener () {
@@ -135,15 +141,17 @@ function qrCodeListener () {
 		var img = '<span>Scan this QrCode with your 2FA application (e.g., Google Authenticator):</span><br>';
 		img += '<img src="data:image/png;base64, '+json.qrcode+'" alt="2FA QrCode" />';
 		document.getElementById('divQrCode').innerHTML = img;
+		showOkButton(true);
 	}
 	else {
 		//already validated
 		document.getElementById('divQrCode').innerHTML = '';
 		document.getElementById('divCode').style.display = "none";
 
-		var error = '<span style="">Error: Already validated, nothing see here</span>'
+		var error = '<span style="">Error: 2FA already configured</span>'
 		document.getElementById('divError').innerHTML = error;
 		document.getElementById('divError').style.display = "block";
+		showOkButton(false);
 	}
 }
 
