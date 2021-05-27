@@ -75,7 +75,32 @@ function() {
 	jspUrl += ('?email='+email);
 
 	var oReq = new XMLHttpRequest();
-	oReq.onload = qrCodeListener;
+	oReq.onload = function()
+	{
+		var json = JSON.parse(this.responseText);
+	
+		if (json.status == 'pending')
+		{
+			document.getElementById('divError').innerHTML = '';
+			document.getElementById('divError').style.display = "none";
+	
+			document.getElementById('divCode').style.display = "block";
+			var img = '<span>Scan this QrCode with your 2FA application (e.g., Google Authenticator):</span><br>';
+			img += '<img src="data:image/png;base64, '+json.qrcode+'" alt="2FA QrCode" />';
+			document.getElementById('divQrCode').innerHTML = img;
+			zimletInstance.pbDialog.setButtonVisible(DwtDialog.OK_BUTTON, true);
+		}
+		else {
+			//already validated
+			document.getElementById('divQrCode').innerHTML = '';
+			document.getElementById('divCode').style.display = "none";
+	
+			var error = '<span style="">Error: 2FA already configured</span>'
+			document.getElementById('divError').innerHTML = error;
+			document.getElementById('divError').style.display = "block";
+			zimletInstance.pbDialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
+		}
+	};
 	oReq.open("get", jspUrl, true);
 	oReq.send();
 };
@@ -102,58 +127,28 @@ function() {
 	jspUrl += ('?email='+email);
 	jspUrl += ('&code='+code);
 
+	var dialog = this.pbDialog;
+
 	var oReq = new XMLHttpRequest();
-	oReq.onload = validateListener;
+	oReq.onload = function()
+	{
+		var error = '';
+		var json = JSON.parse(this.responseText);
+		if (json.status == 'error')
+		{
+			error = '<span style="">Error: Invalid code, try again</span>';
+		}
+		else {
+			error = '<span style="">Success, 2FA configured</span>';
+		}
+	
+		document.getElementById('divError').style.display = "block";
+		document.getElementById('divError').innerHTML = error;
+		dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
+	};
 	oReq.open("get", jspUrl, true);
 	oReq.send();
 };
-
-function showOkButton(show)
-{
-	document.querySelectorAll('*[id^="OK_"]')[0].style.display=(show?'block':'none');
-}
-
-function validateListener () {
-	var error = '';
-	var json = JSON.parse(this.responseText);
-	if (json.status == 'error')
-	{
-		error = '<span style="">Error: Invalid code, try again</span>';
-	}
-	else {
-		error = '<span style="">Success, 2FA configured</span>';
-	}
-
-	document.getElementById('divError').style.display = "block";
-	document.getElementById('divError').innerHTML = error;
-	showOkButton(false);
-}
-
-function qrCodeListener () {
-	var json = JSON.parse(this.responseText);
-
-	if (json.status == 'pending')
-	{
-		document.getElementById('divError').innerHTML = '';
-		document.getElementById('divError').style.display = "none";
-
-		document.getElementById('divCode').style.display = "block";
-		var img = '<span>Scan this QrCode with your 2FA application (e.g., Google Authenticator):</span><br>';
-		img += '<img src="data:image/png;base64, '+json.qrcode+'" alt="2FA QrCode" />';
-		document.getElementById('divQrCode').innerHTML = img;
-		showOkButton(true);
-	}
-	else {
-		//already validated
-		document.getElementById('divQrCode').innerHTML = '';
-		document.getElementById('divCode').style.display = "none";
-
-		var error = '<span style="">Error: 2FA already configured</span>'
-		document.getElementById('divError').innerHTML = error;
-		document.getElementById('divError').style.display = "block";
-		showOkButton(false);
-	}
-}
 
 br_com_sampaio_twofa_client_HandlerObject.prototype._dismissBtnListener =
 function() {
