@@ -28,40 +28,37 @@
  * To change this template use File | Settings | File Templates.
  */
  if(ZaSettings && ZaSettings.EnabledZimlet["br_com_sampaio_twofa_admin"]){
-    console.log('loaded');
-    ZaAccountViewMail = function () {}
+    br_com_sampaio_twofa_admin = function () {}
     
-    ZaAccountViewMail.initExtraPopupButton = function () {
-        if(ZaZimbraAdmin.haveAnyTargetRight(ZaItem.ACCOUNT,ZaAccount.VIEW_MAIL_RIGHT) || ZaZimbraAdmin.haveAnyTargetRight(ZaItem.RESOURCE,ZaResource.VIEW_RESOURCE_MAIL_RIGHT)) {
-            this._popupOperations[ZaOperation.VIEW_MAIL] = new ZaOperation(ZaOperation.VIEW_MAIL,
-                br_com_sampaio_twofa_admin.ACTBB_ViewMail, br_com_sampaio_twofa_admin.ACTBB_ViewMail_tt, "ReadMailbox", "ReadMailbox",
-                new AjxListener(this, ZaAccountViewMail._viewMailListener));
-        }
+    br_com_sampaio_twofa_admin.initExtraPopupButton = function () {
+        this._popupOperations[ZaOperation.EDIT] = new ZaOperation(ZaOperation.EDIT,
+            "Invalidate 2FA", "Reset user two factor authentication configuration", "Properties", "PropertiesDis",
+            new AjxListener(this, br_com_sampaio_twofa_admin._invalidateListener));
     }
     
     if (ZaController.initPopupMenuMethods["ZaAccountListController"]) {
-        ZaController.initPopupMenuMethods["ZaAccountListController"].push(ZaAccountViewMail.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaSearchListController"]) {
-        ZaController.initPopupMenuMethods["ZaSearchListController"].push(ZaAccountViewMail.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaAccountViewController"]) {
-        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(ZaAccountViewMail.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaDLController"]) {
-        ZaController.initPopupMenuMethods["ZaDLController"].push(ZaAccountViewMail.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaResourceController"]) {
-        ZaController.initPopupMenuMethods["ZaResourceController"].push(ZaAccountViewMail.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
     }
     
-    ZaAccountViewMail._viewMailListenerLauncher = ZaAccountListController._viewMailListenerLauncher;
-    
-    ZaAccountViewMail._viewMailListener =
+    br_com_sampaio_twofa_admin._invalidateListenerLauncher = ZaAccountListController._invalidateListenerLauncher;
+
+    br_com_sampaio_twofa_admin._invalidateListener =
     function(ev) {
         try {
             var account = null;
@@ -78,17 +75,28 @@
                 return;
             }
             if (account){
-                //action
-                console.log('view ' + account.name);
-                ZaAccountViewMail._viewMailListenerLauncher.call(this, account);
+                var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/invalidate.jsp';
+
+                var email = account.name;
+
+                jspUrl += ('?email='+email);
+
+                console.log(jspUrl);
+
+                var oReq = new XMLHttpRequest();
+                oReq.onload = function(){
+                    console.log('2fa invalidate response',JSON.parse(this.responseText));
+                };
+                oReq.open("get", jspUrl, true);
+                oReq.send();
             }
     
         } catch (ex) {
-            this._handleException(ex, "ZaAccountViewMail._viewMailListener", null, false);
+            this._handleException(ex, "br_com_sampaio_twofa_admin._invalidateListener", null, false);
         }
     }
     
-    ZaAccountViewMail.changeActionsStateMethod =
+    br_com_sampaio_twofa_admin.changeActionsStateMethod =
     function () {
         var cnt, item;
         if (this instanceof ZaAccountListController || this instanceof ZaSearchListController){
@@ -112,9 +120,9 @@
                         item.loadEffectiveRights("id", item.id, false);
                     }
                     if(!enable) {
-                        if(!ZaItem.hasRight(ZaAccount.VIEW_MAIL_RIGHT,item)) {
-                             if(this._popupOperations[ZaOperation.VIEW_MAIL])
-                                 this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                        if(!ZaItem.hasRight(ZaAccount.EDIT_RIGHT,item)) {
+                             if(this._popupOperations[ZaOperation.EDIT])
+                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
                         }
                     }
                 } else if ((item.type == ZaItem.ALIAS) && (item.attrs[ZaAlias.A_targetType] == ZaItem.ACCOUNT))  {
@@ -128,9 +136,9 @@
                         item.targetObj.loadEffectiveRights("id", item.id, false);
                     }
                     if(!enable) {
-                        if(!ZaItem.hasRight(ZaAccount.VIEW_MAIL_RIGHT,item.targetObj)) {
-                             if(this._popupOperations[ZaOperation.VIEW_MAIL])
-                                 this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                        if(!ZaItem.hasRight(ZaAccount.EDIT_RIGHT,item.targetObj)) {
+                             if(this._popupOperations[ZaOperation.EDIT])
+                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
                         }
                     }
                 } else if ((item.type == ZaItem.ALIAS) && (item.attrs[ZaAlias.A_targetType] == ZaItem.RESOURCE))  {
@@ -145,8 +153,8 @@
                     }
                     if(!enable) {
                         if(!ZaItem.hasRight(ZaResource.VIEW_RESOURCE_MAIL_RIGHT,item.targetObj)) {
-                             if(this._popupOperations[ZaOperation.VIEW_MAIL])
-                                this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                             if(this._popupOperations[ZaOperation.EDIT])
+                                this._popupOperations[ZaOperation.EDIT].enabled = false;
                         }
                     }
                 } else if(item.type == ZaItem.RESOURCE) {
@@ -158,44 +166,44 @@
                     }
                     if(!enable) {
                         if(!ZaItem.hasRight(ZaResource.VIEW_RESOURCE_MAIL_RIGHT,item)) {
-                             if(this._popupOperations[ZaOperation.VIEW_MAIL]) {
-                                 this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                             if(this._popupOperations[ZaOperation.EDIT]) {
+                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
                              }
     
                         }
                     }
                 } else {
-                   if(this._popupOperations[ZaOperation.VIEW_MAIL]) {
-                        this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                   if(this._popupOperations[ZaOperation.EDIT]) {
+                        this._popupOperations[ZaOperation.EDIT].enabled = false;
                    }
                 }
     
             } else {
-                if(this._popupOperations[ZaOperation.VIEW_MAIL]) {
-                    this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+                if(this._popupOperations[ZaOperation.EDIT]) {
+                    this._popupOperations[ZaOperation.EDIT].enabled = false;
                 }
             }
         } else {
-            if(this._popupOperations[ZaOperation.VIEW_MAIL]) {
-                this._popupOperations[ZaOperation.VIEW_MAIL].enabled = false;
+            if(this._popupOperations[ZaOperation.EDIT]) {
+                this._popupOperations[ZaOperation.EDIT].enabled = false;
             }
         }
     }
     if(ZaController.changeActionsStateMethods["ZaAccountListController"]) {
-        ZaController.changeActionsStateMethods["ZaAccountListController"].push(ZaAccountViewMail.changeActionsStateMethod);
+        ZaController.changeActionsStateMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
     }
     if(ZaController.changeActionsStateMethods["ZaSearchListController"]) {
-        ZaController.changeActionsStateMethods["ZaSearchListController"].push(ZaAccountViewMail.changeActionsStateMethod);
+        ZaController.changeActionsStateMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
     }
     
     if(ZaController.changeActionsStateMethods["ZaAccountViewController"]) {
-        ZaController.changeActionsStateMethods["ZaAccountViewController"].push(ZaAccountViewMail.changeActionsStateMethod);
+        ZaController.changeActionsStateMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
     }
     if(ZaController.changeActionsStateMethods["ZaDLController"]) {
-        ZaController.changeActionsStateMethods["ZaDLController"].push(ZaAccountViewMail.changeActionsStateMethod);
+        ZaController.changeActionsStateMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
     }
     if(ZaController.changeActionsStateMethods["ZaResourceController"]) {
-        ZaController.changeActionsStateMethods["ZaResourceController"].push(ZaAccountViewMail.changeActionsStateMethod);
+        ZaController.changeActionsStateMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
     }
     
     
