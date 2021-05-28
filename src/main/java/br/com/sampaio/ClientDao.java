@@ -115,7 +115,7 @@ public class ClientDao {
 
 	public void invalidateSecretKey(String email) throws SQLException
 	{
-		String sql = "update clients set validated = false, secret_key = null  "
+		String sql = "update clients set validated = false, secret_key = ''  "
 				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
 		
 		this.openConnection();
