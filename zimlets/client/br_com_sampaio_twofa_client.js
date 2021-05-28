@@ -107,11 +107,12 @@ function() {
 
 br_com_sampaio_twofa_client_HandlerObject.prototype._createDialogView = 
 function() {
-	var html = '<div id="divQrCode"></div>';
-	html += '<div id="divCode" style="display:none;">';
-	html += '<label for="code">Code </label><input type="text" name="code" id="code"/>';
+	var html = '<div id="divQrCode" style="text-align: center;"></div>';
+	html += '<div id="divCode" style="text-align: center; display:none;">';
+	html += '<span>Input here the code that you application shows:</span></p>';
+	html += '<input type="text" name="code" id="code"/>';
 	html += '</div>';
-	html += '<div id="divError" style="display:none;"></div>';
+	html += '<div id="divError" style="text-align: center; display:none;"></div>';
 
 	return html;
 }
@@ -136,15 +137,15 @@ function() {
 		var json = JSON.parse(this.responseText);
 		if (json.status == 'error')
 		{
-			error = '<span style="">Error: Invalid code, try again</span>';
+			error = '<br><span style="font-weight: bold;">Error: Invalid code, try again</span>';
 		}
 		else {
-			error = '<span style="">Success, 2FA configured</span>';
+			error = '<br><span style="">Success, 2FA configured!</span>';
+			dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
 		}
 	
 		document.getElementById('divError').style.display = "block";
 		document.getElementById('divError').innerHTML = error;
-		dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
 	};
 	oReq.open("get", jspUrl, true);
 	oReq.send();
