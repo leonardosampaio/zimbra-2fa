@@ -20,7 +20,7 @@
  * All portions of the code are Copyright (C) 2011, 2012, 2013, 2014, 2016 Synacor, Inc. All Rights Reserved.
  * ***** END LICENSE BLOCK *****
 -->
-<zimlet name="br_com_sampaio_twofa_admin" version="8.5.0" label="${msg.label}" description="${msg.description}" extension="true">
+<zimlet name="br_com_sampaio_twofa_admin" version="1.0" label="${msg.label}" description="${msg.description}" extension="true">
     <include>br_com_sampaio_twofa_admin.js</include>
     <disableUIUndeploy>FALSE</disableUIUndeploy>
 </zimlet>
