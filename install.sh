@@ -48,7 +48,7 @@ sudo -u $jettyUser cp -R jsp/login.8.8.15.2fa.jsp $jettyPath"/webapps/zimbra/pub
 
 echo 'Copying 2fa configuration file';
 sudo -u $zimbraUser cp -R config/config.properties $installFolder"/config.properties"
-sudo -u $zimbraUser /bin/sed -ie "s/^mysqlPassword=.*/mysqlPassword=$randomPassword/" $installFolder"/config.properties"
+sudo -u $zimbraUser /bin/sed -i "s/^mysqlPassword=.*/mysqlPassword=$randomPassword/" $installFolder"/config.properties"
 
 echo 'Activating jsp files in zimlets';
 sudo -u $zimbraUser $zimbraBinPath"/zmprov" ms "$domain" zimbraZimletJspEnabled TRUE
