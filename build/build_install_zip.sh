@@ -6,4 +6,6 @@ rm install.zip
     dist \
     jsp/login.8.8.15.2fa.jsp \
     sql \
-    install.sh
+    install.sh \
+    README.md
+ls -latrh install.zip
