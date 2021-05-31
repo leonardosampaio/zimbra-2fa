@@ -9,6 +9,7 @@ fi
 
 zimbraUser=zimbra
 jettyUser=$zimbraUser
+mysqlUser=$zimbraUser
 
 zimbraBinPath="/opt/zimbra/bin"
 localconfig=`$zimbraBinPath/zmlocalconfig -s`
@@ -30,7 +31,7 @@ sudo chown -R $zimbraUser:$zimbraUser $installFolder
 
 echo 'Creating database';
 sed -ie "s/IDENTIFIED BY '.*';/IDENTIFIED BY '$randomPassword';/" sql/create.sql
-sudo -u $zimbraUser $zimbraBinPath"/mysql" -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
+sudo -u $mysqlUser $zimbraBinPath"/mysql" --verbose -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
 
 echo 'Copying jar library';
 sudo -u $jettyUser cp -R dist/2fa-1.0.jar $jettyPath"/common/lib/"
