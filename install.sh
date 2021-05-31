@@ -8,8 +8,8 @@ fi
 #######################################################################################
 
 zimbraUser=zimbra
-jettyUser=$zimbraUser
-mysqlUser=$zimbraUser
+jettyUser=`ps -ef | grep jetty | grep -v grep | awk '{ print $1 }'`
+mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
 
 zimbraBinPath="/opt/zimbra/bin"
 localconfig=`$zimbraBinPath/zmlocalconfig -s`
@@ -20,10 +20,11 @@ jettyPath=$zimbraPath"/jetty"
 mysqlZimbraDb=zimbra
 mysqlRootUser=root
 mysqlRootPassword=`echo "$localconfig" | grep -Po '(?<=^mysql_root_password = ).*$'`
-date=$(date '+%Y-%m-%d')
-randomPassword=`date +%s | sha256sum | base64 | head -c 32 ; echo`
 
 #######################################################################################
+
+date=$(date '+%Y-%m-%d')
+randomPassword=`date +%s | sha256sum | base64 | head -c 32 ; echo`
 
 echo 'Creating install folder'
 sudo mkdir -p $installFolder"/backup"
