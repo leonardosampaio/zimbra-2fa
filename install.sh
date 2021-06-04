@@ -7,10 +7,6 @@ fi
 
 #######################################################################################
 
-zimbraUser=zimbra
-jettyUser=`ps -ef | grep jetty | grep -v grep | awk '{ print $1 }'`
-mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
-
 zimbraBinPath="/opt/zimbra/bin"
 localconfig=`$zimbraBinPath/zmlocalconfig -s`
 domain=`echo "$localconfig" | grep -Po '(?<=^zimbra_server_hostname = ).*$'`
@@ -20,6 +16,11 @@ jettyPath=$zimbraPath"/jetty"
 mysqlZimbraDb=zimbra
 mysqlRootUser=root
 mysqlRootPassword=`echo "$localconfig" | grep -Po '(?<=^mysql_root_password = ).*$'`
+jettyCommonLibDir=$jettyPath"/common/lib"
+
+zimbraUser=zimbra
+jettyUser=`stat -c '%U' $jettyCommonLibDir`
+mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
 
 #######################################################################################
 
@@ -35,7 +36,7 @@ sed -ie "s/IDENTIFIED BY '.*';/IDENTIFIED BY '$randomPassword';/" sql/create.sql
 sudo -u $mysqlUser $zimbraBinPath"/mysql" --verbose -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
 
 echo 'Copying jar library';
-sudo -u $jettyUser cp -R dist/2fa-1.0.jar $jettyPath"/common/lib/"
+sudo -u $jettyUser cp -R dist/2fa-1.0.jar $jettyCommonLibDir
 
 echo 'Installing zimlets';
 sudo -u $zimbraUser cp -R dist/br_com_sampaio_twofa_client.zip $zimbraPath"/zimlets"
