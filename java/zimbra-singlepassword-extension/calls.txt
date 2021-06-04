@@ -1,0 +1,24 @@
+//        	SMTP
+//        	context:
+//    		authMode PASSWORD
+//    		anp admin@mail.imanudin.net
+//    		remoteip 172.17.0.2
+//    		proto soap
+//    		ocip null
+//    		ua null
+        	
+//        	IMAP
+//    		context:
+//    		anp admin@mail.imanudin.net
+//    		remoteip 172.17.0.2
+//    		proto imap
+//    		ocip 192.168.0.229
+//    		ua Zimbra/8.8.15_GA_4018
+        	
+//        	POP3
+//        	context:
+//    		anp admin@mail.imanudin.net
+//    		remoteip 172.17.0.2
+//    		proto pop3
+//    		ocip 192.168.0.229
+//    		ua null

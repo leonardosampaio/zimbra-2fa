@@ -1,0 +1,9 @@
+target/
+
+.vagrant/
+Vagrantfile.yml
+ubuntu-*-console.log
+
+.classpath
+.project
+.settings/

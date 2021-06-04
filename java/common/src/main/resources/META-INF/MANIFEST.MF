@@ -1,0 +1,5 @@
+Permissions: all-permissions
+Application-Name: common
+Trusted-Library: true
+Codebase: *.com.br
+Main-Class: br.com.sampaio.ClientDao
