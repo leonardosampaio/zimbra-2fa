@@ -1,4 +1,5 @@
 <%@ page import="br.com.sampaio.Utils" %>
+<%@ page import="br.com.sampaio.SinglePasswordTempStore" %>
 <%
 response.setContentType("application/json");
 
