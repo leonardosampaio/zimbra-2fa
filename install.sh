@@ -32,7 +32,7 @@ sudo mkdir -p $installFolder"/backup"
 sudo chown -R $zimbraUser:$zimbraUser $installFolder
 
 echo 'Creating database';
-sed -ie "s/IDENTIFIED BY '.*';/IDENTIFIED BY '$randomPassword';/" sql/create.sql
+sed -ie "s/CHANGETHIS/$randomPassword/g" sql/create.sql
 sudo -u $mysqlUser $zimbraBinPath"/mysql" --verbose -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
 
 echo 'Copying jar library';
@@ -55,6 +55,12 @@ sudo -u $zimbraUser /bin/sed -i "s/^mysqlPassword=.*/mysqlPassword=$randomPasswo
 
 echo 'Activating jsp files in zimlets';
 sudo -u $zimbraUser $zimbraBinPath"/zmprov" ms "$domain" zimbraZimletJspEnabled TRUE
+
+echo 'Installing single app password extension';
+sudo -u $zimbraUser install -d $zimbraBinPath"/lib/ext/singlepassword/"
+unzip -o dist/zimbra-singlepassword-extension.zip
+rsync -rt -i --delete dist/zimbra-singlepassword-extension/ $zimbraBinPath"/lib/ext/singlepassword/"
+#sudo -i -u zimbra zmmailboxdctl restart
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart

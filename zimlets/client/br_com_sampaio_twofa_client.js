@@ -113,6 +113,7 @@ function() {
 	html += '<input type="text" name="code" id="code"/>';
 	html += '</div>';
 	html += '<div id="divError" style="text-align: center; display:none;"></div>';
+	html += '<div id="divSingleAppPassword" style="text-align: center; display:none;"></div>';
 
 	return html;
 }
@@ -141,6 +142,7 @@ function() {
 		}
 		else {
 			error = '<br><span style="">Success, 2FA configured!</span>';
+			console.log('singleAppPassword',json.singleAppPassword);
 			dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
 		}
 	

@@ -10,6 +10,9 @@ import com.zimbra.cs.account.auth.AuthMechanism;
 import com.zimbra.cs.account.auth.ZimbraCustomAuth;
 import com.zimbra.cs.account.ldap.LdapProv;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
+import br.com.sampaio.SinglePasswordTempStore;
+
 public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 
     public void register(String id) {
@@ -49,7 +52,16 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 			{
 				//imap/smtp/pop3
 				ZimbraLog.account.info("[SinglePasswordAuthHandler] account %s authenticating with single password", account);
-				if (password == null || password.isEmpty() || !password.equals("teste"))
+				
+				String dbHash = SinglePasswordTempStore.getInstance().getSingleAppPasswordHash(account.getName());
+				
+				String bcryptHashString = BCrypt.withDefaults().hashToString(12, password.toCharArray());
+				
+				if (password == null ||
+						password.isEmpty() ||
+						dbHash == null ||
+						dbHash.isEmpty() ||
+						!bcryptHashString.equals(dbHash))
             	{
 					throw new SinglePasswordException(
 						String.format("[SinglePasswordAuthHandler] Invalid single password for account %s",

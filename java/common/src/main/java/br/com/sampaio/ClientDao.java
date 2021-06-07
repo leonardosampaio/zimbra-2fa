@@ -151,4 +151,55 @@ public class ClientDao {
 		
 		return result;
 	}
+
+	public void putSingleAppPasswordHash(String email, String bcryptHashString) throws SQLException {
+		String sql = "insert into single_app_password (email, hash) values (?,?)"
+				+ " on duplicate key update hash = ?";
+		
+		this.openConnection();
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setString(1, email);
+		preparedStatement.setString(2, bcryptHashString);
+		preparedStatement.executeUpdate();
+		preparedStatement.close();
+		this.closeConnection();
+	}
+	
+	public String getSingleAppPasswordHash(String email) throws SQLException
+	{
+		String result = null;
+		
+		String sql = "select hash from single_app_password "
+				+ "where (lower(email) = ? or "
+				+ "lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
+		this.openConnection();
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		
+		if (resultSet.next())
+		{
+			result = resultSet.getString("hash");
+		}
+		
+		resultSet.close();
+		preparedStatement.close();
+		this.closeConnection();
+		
+		return result;
+	}
+
+	public void invalidateSingleAppPasswordHash(String email) throws SQLException {
+		String sql = "update single_app_password set hash = null "
+				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
+		
+		this.openConnection();
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
+		preparedStatement.executeUpdate();
+		preparedStatement.close();
+		this.closeConnection();
+	}
 }

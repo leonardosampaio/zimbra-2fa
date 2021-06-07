@@ -1,4 +1,5 @@
 <%@ page import="br.com.sampaio.Utils" %>
+<%@ page import="br.com.sampaio.SinglePasswordTempStore" %>
 <%
 response.setContentType("application/json");
 
@@ -9,7 +10,17 @@ String companyName = "Zimbra 2FA "+email.split("@")[1];
 
 String b64Png = "";
 String status = "valid";
-boolean valid = false;
+String singleAppPassword = "";
+
+SinglePasswordTempStore instance = null;
+if (request.getServletContext().getAttribute("singlePasswordTempStore") == null)
+{
+	instance = SinglePasswordTempStore.getInstance();
+	request.getServletContext().setAttribute("singlePasswordTempStore", instance);
+}
+else {
+	instance = (SinglePasswordTempStore)request.getServletContext().getAttribute("singlePasswordTempStore");
+}
 
 try
 {
@@ -17,6 +28,9 @@ try
     {
         b64Png = utils.getQrCodeB64(companyName, email, 300, 300);
         status = "pending";
+    }
+    else {
+        singleAppPassword = instance.getPassword(email);
     }
 }
 catch (Exception e)
@@ -26,7 +40,6 @@ catch (Exception e)
     e.printStackTrace();
 }
 
-
 %>
 
-{"status":"<%=status%>","qrcode":"<%=b64Png%>"}
+{"status":"<%=status%>","qrcode":"<%=b64Png%>","singleAppPassword":"<%=singleAppPassword%>"}
