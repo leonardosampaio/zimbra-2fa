@@ -9,6 +9,18 @@ String code = request.getParameter("code");
 
 String status = "error";
 
+SinglePasswordTempStore instance = null;
+if (request.getServletContext().getAttribute("singlePasswordTempStore") == null)
+{
+	instance = SinglePasswordTempStore.getInstance();
+	request.getServletContext().setAttribute("singlePasswordTempStore", instance);
+}
+else {
+	instance = (SinglePasswordTempStore)request.getServletContext().getAttribute("singlePasswordTempStore");
+}
+
+String singleAppPassword = instance.getPassword(email);
+
 try
 {
     if (!utils.hasValidSecretKey(email) && utils.validateCode(email, code))
@@ -23,4 +35,4 @@ catch (Exception e)
 
 %>
 
-{"status":"<%=status%>"}
+{"status":"<%=status%>","singleAppPassword":"<%=singleAppPassword%>"}

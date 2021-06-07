@@ -99,6 +99,8 @@ function() {
 			document.getElementById('divError').innerHTML = error;
 			document.getElementById('divError').style.display = "block";
 			zimletInstance.pbDialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
+
+			console.log('singleAppPassword',json.singleAppPassword);
 		}
 	};
 	oReq.open("get", jspUrl, true);
@@ -142,7 +144,9 @@ function() {
 		}
 		else {
 			error = '<br><span style="">Success, 2FA configured!</span>';
+			
 			console.log('singleAppPassword',json.singleAppPassword);
+
 			dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
 		}
 	
