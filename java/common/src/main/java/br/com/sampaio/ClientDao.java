@@ -160,7 +160,7 @@ public class ClientDao {
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
 		preparedStatement.setString(1, email);
 		preparedStatement.setString(2, bcryptHashString);
-		preparedStatement.setString(2, bcryptHashString);
+		preparedStatement.setString(3, bcryptHashString);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
