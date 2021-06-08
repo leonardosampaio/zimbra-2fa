@@ -58,8 +58,12 @@ sudo -u $zimbraUser $zimbraBinPath"/zmprov" ms "$domain" zimbraZimletJspEnabled 
 
 echo 'Installing single app password extension';
 sudo -u $jettyUser install -d $zimbraBinPath"/lib/ext/singlepassword/"
-sudo -u $jettyUser unzip -o dist/zimbra-singlepassword-extension.zip
-sudo -u $jettyUser rsync -rt -i --delete zimbra-singlepassword-extension/ $zimbraBinPath"/lib/ext/singlepassword/"
+sudo -u $jettyUser unzip -o zimbra-singlepassword-extension.zip
+sudo -u $jettyUser rsync -rt -i --delete zimbra-singlepassword-extension/ $zimbraPath"/lib/ext/singlepassword/"
+sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraAuthMech custom:singlepassword
+sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraPasswordChangeListener singlepassword
+sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraAuthFallbackToLocal FALSE
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart
+
