@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS 2fa.clients (
 );
 CREATE TABLE IF NOT EXISTS 2fa.single_app_password (
 	id 			MEDIUMINT 	NOT NULL AUTO_INCREMENT,
-	email 		CHAR(100) 	UNIQUE NOT NULL,
+	email 		CHAR(100) 	NOT NULL,
 	hash	 	CHAR(100),
 	PRIMARY KEY (id)
 );
-GRANT SELECT, INSERT, UPDATE ON 2fa.single_app_password TO '2fa_integration'@'localhost' WITH GRANT OPTION;
+GRANT SELECT, INSERT, DELETE ON 2fa.single_app_password TO '2fa_integration'@'localhost' WITH GRANT OPTION;
 GRANT SELECT, INSERT, UPDATE ON 2fa.clients TO '2fa_integration'@'localhost' WITH GRANT OPTION;

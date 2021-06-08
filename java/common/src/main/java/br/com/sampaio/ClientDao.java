@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class ClientDao {
@@ -153,22 +155,20 @@ public class ClientDao {
 	}
 
 	public void putSingleAppPasswordHash(String email, String bcryptHashString) throws SQLException {
-		String sql = "insert into single_app_password (email, hash) values (?,?)"
-				+ " on duplicate key update hash = ?";
+		String sql = "insert into single_app_password (email, hash) values (?,?)";
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
 		preparedStatement.setString(1, email);
 		preparedStatement.setString(2, bcryptHashString);
-		preparedStatement.setString(3, bcryptHashString);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
 	}
 	
-	public String getSingleAppPasswordHash(String email) throws SQLException
+	public List<String> getSingleAppPasswordHash(String email) throws SQLException
 	{
-		String result = null;
+		List<String> result = new ArrayList<>();
 		
 		String sql = "select hash from single_app_password "
 				+ "where (lower(email) = ? or "
@@ -179,9 +179,9 @@ public class ClientDao {
 		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
-		if (resultSet.next())
+		while(resultSet.next())
 		{
-			result = resultSet.getString("hash");
+			result.add(resultSet.getString("hash"));
 		}
 		
 		resultSet.close();
@@ -192,7 +192,7 @@ public class ClientDao {
 	}
 
 	public void invalidateSingleAppPasswordHash(String email) throws SQLException {
-		String sql = "update single_app_password set hash = null "
+		String sql = "delete from single_app_password "
 				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
 		
 		this.openConnection();

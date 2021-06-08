@@ -9,6 +9,7 @@ import com.zimbra.cs.account.Provisioning;
 import com.zimbra.cs.extension.ExtensionException;
 import com.zimbra.cs.extension.ZimbraExtension;
 
+import br.com.sampaio.auth.SinglePasswordAuthChangePasswordListener;
 import br.com.sampaio.auth.SinglePasswordAuthHandler;
 import br.com.sampaio.auth.SinglePasswordAuthMech;
 
@@ -22,6 +23,7 @@ public class SinglePasswordExtension implements ZimbraExtension {
     
     public void init() throws ExtensionException, ServiceException {
         new SinglePasswordAuthHandler().register(ID);
+        new SinglePasswordAuthChangePasswordListener().register(ID);
         
         final String s = Provisioning.getInstance().getAllDomains().stream()
             .filter(d -> new SinglePasswordAuthMech(d).isEnabled())

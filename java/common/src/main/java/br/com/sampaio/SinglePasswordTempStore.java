@@ -3,6 +3,7 @@ package br.com.sampaio;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -57,7 +58,7 @@ public class SinglePasswordTempStore {
     	return password;
     }
 
-	public String getSingleAppPasswordHash(String name) throws SQLException, IOException {
+	public List<String> getSingleAppPasswordHash(String name) throws SQLException, IOException {
 		return new ClientDao().getSingleAppPasswordHash(name);
 	}
 }

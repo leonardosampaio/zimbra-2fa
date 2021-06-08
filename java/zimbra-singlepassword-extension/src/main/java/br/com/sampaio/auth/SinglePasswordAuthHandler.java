@@ -41,10 +41,10 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 					ProtocolType.OTHER;	
 			}
 			
-			String dbHash = SinglePasswordTempStore.getInstance().getSingleAppPasswordHash(account.getName());
+			List<String> hashs = SinglePasswordTempStore.getInstance().getSingleAppPasswordHash(account.getName());
 			
 			//regular auth
-			if (protocol.equals(ProtocolType.OTHER) || dbHash == null || dbHash.isEmpty())
+			if (protocol.equals(ProtocolType.OTHER) || hashs == null || hashs.isEmpty())
 			{
 				ZimbraLog.account.info("[SinglePasswordAuthHandler] account %s authenticating with AuthMechanism.doZimbraAuth", account);
 				Provisioning provisioningInstance = Provisioning.getInstance();
@@ -56,12 +56,21 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 				//imap/smtp/pop3
 				ZimbraLog.account.info("[SinglePasswordAuthHandler] account %s authenticating with single password", account);
 				
-				BCrypt.Result result = BCrypt.verifyer().verify(password.toCharArray(), dbHash);
+				boolean verified = false;
+				for (String string : hashs)
+				{
+					if(BCrypt.verifyer().verify(password.toCharArray(), string).verified)
+					{
+						verified = true;
+						break;
+					}
+				}
 				
 				if (password == null ||
 						password.isEmpty() ||
-						!result.verified)
+						!verified)
             	{
+					//admin falls back to zimbra auth, see LdapProvisioning.verifyPasswordInternal
 					throw new SinglePasswordException(
 						String.format("[SinglePasswordAuthHandler] Invalid single password for account %s",
 							account));
