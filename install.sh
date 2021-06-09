@@ -1,9 +1,11 @@
 #!/bin/bash
 
 if [ "$(whoami)" != "root" ]; then
-        echo "Invalid user, run as root"
-        exit
+        echo "Invalid user, run as root";
+        exit;
 fi
+
+echo "Setting environment variables";
 
 #######################################################################################
 
@@ -24,6 +26,12 @@ mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
 
 #######################################################################################
 
+if [ -z "$mysqlUser" ]
+then
+        echo "MySQL/MariaDB not running, exiting";
+        exit;
+fi
+
 date=$(date '+%Y-%m-%d')
 randomPassword=`date +%s | sha256sum | base64 | head -c 32 ; echo`
 
@@ -33,9 +41,9 @@ sudo chown -R $zimbraUser:$zimbraUser $installFolder
 
 echo 'Creating database';
 sed -ie "s/CHANGETHIS/$randomPassword/g" sql/create.sql
-sudo -u $mysqlUser $zimbraBinPath"/mysql" --verbose -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
+sudo -u $mysqlUser $zimbraBinPath"/mysql" -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
 
-echo 'Copying jar library';
+echo 'Copying 2fa jar library';
 sudo -u $jettyUser cp -R dist/2fa-1.0.jar $jettyCommonLibDir
 
 echo 'Installing zimlets';
@@ -50,6 +58,7 @@ sudo -u $jettyUser cp -R $jettyPath"/webapps/zimbra/public/login.jsp" $installFo
 sudo -u $jettyUser cp -R jsp/login.8.8.15.2fa.jsp $jettyPath"/webapps/zimbra/public/login.jsp"
 
 echo 'Copying 2fa configuration file';
+#if you need to change this, define environment variable 2FA_CONFIG_FILE_PATH, visible to Jetty server
 sudo -u $zimbraUser cp -R config/config.properties $installFolder"/config.properties"
 sudo -u $zimbraUser /bin/sed -i "s/^mysqlPassword=.*/mysqlPassword=$randomPassword/" $installFolder"/config.properties"
 
@@ -58,12 +67,16 @@ sudo -u $zimbraUser $zimbraBinPath"/zmprov" ms "$domain" zimbraZimletJspEnabled 
 
 echo 'Installing single app password extension';
 sudo -u $jettyUser install -d $zimbraBinPath"/lib/ext/singlepassword/"
-sudo -u $jettyUser unzip -o zimbra-singlepassword-extension.zip
+sudo -u $jettyUser unzip -o dist/zimbra-singlepassword-extension.zip
 sudo -u $jettyUser rsync -rt -i --delete zimbra-singlepassword-extension/ $zimbraPath"/lib/ext/singlepassword/"
+
+echo 'Activating single app password extension';
 sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraAuthMech custom:singlepassword
-sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraPasswordChangeListener singlepassword
+#optional
+#sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraPasswordChangeListener singlepassword
+
+echo 'Disabling auth fall back to local';
 sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraAuthFallbackToLocal FALSE
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart
-
