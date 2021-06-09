@@ -30,33 +30,45 @@
  if(ZaSettings && ZaSettings.EnabledZimlet["br_com_sampaio_twofa_admin"]){
     br_com_sampaio_twofa_admin = function () {}
     
-    br_com_sampaio_twofa_admin.initExtraPopupButton = function () {
+    br_com_sampaio_twofa_admin.initInvalidatePopupButton = function () {
         this._popupOperations[ZaOperation.EDIT] = new ZaOperation(ZaOperation.EDIT,
             "Invalidate 2FA", "Reset user two factor authentication configuration", "Properties", "PropertiesDis",
             new AjxListener(this, br_com_sampaio_twofa_admin._invalidateListener));
     }
+
+    br_com_sampaio_twofa_admin.initChangePasswordPopupButton = function () {
+        this._popupOperations[ZaOperation.EDIT] = new ZaOperation(ZaOperation.EDIT,
+            "Set temporary web password", "Set temporary web password", "Properties", "PropertiesDis",
+            new AjxListener(this, br_com_sampaio_twofa_admin._changePasswordListenerLauncher));
+    }
     
     if (ZaController.initPopupMenuMethods["ZaAccountListController"]) {
-        ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initInvalidatePopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initChangePasswordPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaSearchListController"]) {
-        ZaController.initPopupMenuMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.initInvalidatePopupButton);
+        ZaController.initPopupMenuMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.initChangePasswordPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaAccountViewController"]) {
-        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.initInvalidatePopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.initChangePasswordPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaDLController"]) {
-        ZaController.initPopupMenuMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.initInvalidatePopupButton);
+        ZaController.initPopupMenuMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.initChangePasswordPopupButton);
     }
     
     if (ZaController.initPopupMenuMethods["ZaResourceController"]) {
-        ZaController.initPopupMenuMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.initInvalidatePopupButton);
+        ZaController.initPopupMenuMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.initChangePasswordPopupButton);
     }
     
     br_com_sampaio_twofa_admin._invalidateListenerLauncher = ZaAccountListController._invalidateListenerLauncher;
+    br_com_sampaio_twofa_admin._changePasswordListenerLauncher = ZaAccountListController._changePasswordListenerLauncher;
 
     br_com_sampaio_twofa_admin._invalidateListener =
     function(ev) {
@@ -81,8 +93,6 @@
 
                 jspUrl += ('?email='+email);
 
-                console.log(jspUrl);
-
                 var oReq = new XMLHttpRequest();
                 oReq.onload = function(){
                     console.log('2fa invalidate response',JSON.parse(this.responseText));
@@ -96,6 +106,42 @@
         }
     }
     
+    br_com_sampaio_twofa_admin._changePasswordListenerLauncher =
+    function(ev) {
+        try {
+            var account = null;
+            if (this instanceof ZaAccountListController || this instanceof ZaSearchListController){
+                var accounts = this._contentView.getSelection();
+                if(!accounts || accounts.length<=0) {
+                    return;
+                }
+                account = accounts[0];
+    
+            } else if (this instanceof ZaAccountViewController || this instanceof ZaDLController || this instanceof ZaResourceController){
+                account = this._currentObject;
+            } else {
+                return;
+            }
+            if (account){
+                var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/tempPassword.jsp';
+
+                var email = account.name;
+
+                jspUrl += ('?email='+email);
+
+                var oReq = new XMLHttpRequest();
+                oReq.onload = function(){
+                    alert(JSON.parse(this.responseText));
+                };
+                oReq.open("get", jspUrl, true);
+                oReq.send();
+            }
+    
+        } catch (ex) {
+            this._handleException(ex, "br_com_sampaio_twofa_admin._invalidateListener", null, false);
+        }
+    }
+
     br_com_sampaio_twofa_admin.changeActionsStateMethod =
     function () {
         var cnt, item;
