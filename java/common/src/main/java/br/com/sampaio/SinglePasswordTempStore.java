@@ -27,6 +27,13 @@ public class SinglePasswordTempStore {
         return instance;
     }
 
+    /**
+     * Admin zimlet > invalidate.jsp calls this
+     * 
+     * @param email
+     * @throws IOException
+     * @throws SQLException
+     */
     public void invalidatePassword(String email) throws IOException, SQLException
     {
         new ClientDao().invalidateSingleAppPasswordHash(email);
@@ -43,8 +50,9 @@ public class SinglePasswordTempStore {
      */
     public String getPassword(String email) throws IOException, SQLException
     {
-        String password = null;
-    	if (tempStore.get(email) == null)
+        String password = tempStore.get(email);
+        
+    	if (password == null || isSinglePasswordInUse(email, password))
     	{
             password = new RandomString(8, ThreadLocalRandom.current()).nextString();
     		String bcryptHashString = BCrypt.withDefaults().hashToString(12, password.toCharArray());
@@ -57,8 +65,48 @@ public class SinglePasswordTempStore {
         
     	return password;
     }
+    
+    /**
+     * Avoid generating new temporary password if the current one is unused. 
+     * @param email
+     * @param password
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
+    private boolean isSinglePasswordInUse(String email, String password) throws SQLException, IOException
+    {
+    	List<String> hashs = this.getSingleAppPasswordsHashs(email);
+    	
+    	if (hashs != null && !hashs.isEmpty())
+    	{
+    		for (String hash : hashs)
+    		{
+    			if(BCrypt.verifyer().verify(password.toCharArray(), hash).verified && 
+    					new ClientDao().isHashInUse(email, hash))
+    			{
+    				return true;
+    			}
+    		}
+    	}
+    	
+    	return false;
+    }
 
-	public List<String> getSingleAppPasswordHash(String name) throws SQLException, IOException {
-		return new ClientDao().getSingleAppPasswordHash(name);
+	public List<String> getSingleAppPasswordsHashs(String email) throws SQLException, IOException {
+		return new ClientDao().getSingleAppPasswordHash(email);
+	}
+	
+	/**
+	 * Hash is marked is in use to allow jsp calls to generate a new temporary password.
+	 * 
+	 * @param email
+	 * @param hash
+	 * @throws SQLException
+	 * @throws IOException
+	 */
+	public void setSinglePasswordHashInUse(String email, String hash) throws SQLException, IOException
+	{
+		new ClientDao().setHashInUse(email, hash);
 	}
 }

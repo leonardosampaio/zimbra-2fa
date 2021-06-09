@@ -19,6 +19,13 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
         ZimbraCustomAuth.register(id, this);
     }
 
+    /**
+     * Authentication with bcrypt hashs.
+     * 
+     * Admin users fall back to zimbra auth in case of failure.
+     * 
+     * @see LdapProvisioning.verifyPasswordInternal
+     */
     @Override
     public void authenticate(Account account, String password, Map<String, Object> context, List<String> args) throws Exception {
         try {
@@ -41,7 +48,8 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 					ProtocolType.OTHER;	
 			}
 			
-			List<String> hashs = SinglePasswordTempStore.getInstance().getSingleAppPasswordHash(account.getName());
+			//empty for non-2fa users
+			List<String> hashs = SinglePasswordTempStore.getInstance().getSingleAppPasswordsHashs(account.getName());
 			
 			//regular auth
 			if (protocol.equals(ProtocolType.OTHER) || hashs == null || hashs.isEmpty())
@@ -57,20 +65,21 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 				ZimbraLog.account.info("[SinglePasswordAuthHandler] account %s authenticating with single password", account);
 				
 				boolean verified = false;
-				for (String string : hashs)
+				if (password != null && !password.isEmpty() && hashs != null && !hashs.isEmpty())
 				{
-					if(BCrypt.verifyer().verify(password.toCharArray(), string).verified)
+					for (String hash : hashs)
 					{
-						verified = true;
-						break;
+						if(BCrypt.verifyer().verify(password.toCharArray(), hash).verified)
+						{
+							SinglePasswordTempStore.getInstance().setSinglePasswordHashInUse(account.getName(), hash);
+							verified = true;
+							break;
+						}
 					}
 				}
 				
-				if (password == null ||
-						password.isEmpty() ||
-						!verified)
+				if (!verified)
             	{
-					//admin falls back to zimbra auth, see LdapProvisioning.verifyPasswordInternal
 					throw new SinglePasswordException(
 						String.format("[SinglePasswordAuthHandler] Invalid single password for account %s",
 							account));

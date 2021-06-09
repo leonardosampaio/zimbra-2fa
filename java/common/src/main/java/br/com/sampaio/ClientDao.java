@@ -20,7 +20,7 @@ public class ClientDao {
 	
 	protected ClientDao() throws IOException, SQLException
 	{
-		String configFile = System.getenv("2FA_CONFIG_FILE");
+		String configFile = System.getenv("2FA_CONFIG_FILE_PATH");
 
 		if (configFile == null || configFile.isEmpty())
 		{
@@ -154,8 +154,9 @@ public class ClientDao {
 		return result;
 	}
 
-	public void putSingleAppPasswordHash(String email, String bcryptHashString) throws SQLException {
-		String sql = "insert into single_app_password (email, hash) values (?,?)";
+	public void putSingleAppPasswordHash(String email, String bcryptHashString) throws SQLException
+	{
+		String sql = "insert into single_app_password (email, hash, in_use) values (?,?,false)";
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
@@ -191,7 +192,8 @@ public class ClientDao {
 		return result;
 	}
 
-	public void invalidateSingleAppPasswordHash(String email) throws SQLException {
+	public void invalidateSingleAppPasswordHash(String email) throws SQLException
+	{
 		String sql = "delete from single_app_password "
 				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
 		
@@ -202,5 +204,47 @@ public class ClientDao {
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
+	}
+
+	public void setHashInUse(String email, String hash) throws SQLException
+	{
+		String sql = "update single_app_password set in_use = true  "
+				+ "where (lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?) "
+				+ "and hash = ?";
+		
+		this.openConnection();
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
+		preparedStatement.setString(3, hash);
+		preparedStatement.executeUpdate();
+		preparedStatement.close();
+		this.closeConnection();
+	}
+
+	public boolean isHashInUse(String email, String hash) throws SQLException
+	{
+		boolean result = false;
+		
+		String sql = "select in_use from single_app_password where "
+				+ "(lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?) "
+				+ "and hash = ?";
+		this.openConnection();
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setString(1, email.toLowerCase());
+		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
+		preparedStatement.setString(3, hash);
+		ResultSet resultSet = preparedStatement.executeQuery();
+		
+		if (resultSet.next())
+		{
+			result = resultSet.getBoolean("in_use");
+		}
+		
+		resultSet.close();
+		preparedStatement.close();
+		this.closeConnection();
+		
+		return result;
 	}
 }
