@@ -80,3 +80,7 @@ sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraAuthFal
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart
+
+#to set initial user passwords
+#sudo -u zimbra /opt/zimbra/bin/zmprov sp USER PASSWORD
+#users can change later in Options > Change Password
