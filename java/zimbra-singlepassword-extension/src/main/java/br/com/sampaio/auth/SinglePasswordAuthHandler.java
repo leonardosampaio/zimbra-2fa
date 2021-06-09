@@ -30,7 +30,7 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
     public void authenticate(Account account, String password, Map<String, Object> context, List<String> args) throws Exception {
         try {
 			String contextProtocol = 
-				context.get("proto") != null ? context.get("proto").toString() : null;
+				context != null && context.get("proto") != null ? context.get("proto").toString() : null;
 			
 			ProtocolType protocol = ProtocolType.getByDescription(contextProtocol);
 
