@@ -1,4 +1,6 @@
 #!/bin/bash
+./build_zimlets.sh
+./build_jars.sh
 cd ..
 rm install.zip
 /usr/bin/zip -r install.zip \
