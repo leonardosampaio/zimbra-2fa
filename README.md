@@ -5,17 +5,17 @@ leonardors@gmail.com**
 
 ### Installation
 
-If needed, define theses variables inside install.sh before execution:
+If needed, define theses variables manually inside install.sh before execution:
 
 	zimbraUser=zimbra
-	jettyUser=$zimbraUser
+	jettyUser=`stat -c '%U' $jettyCommonLibDir`
 	mysqlZimbraDb=zimbra
 	mysqlRootUser=root
 	zimbraPath=`echo "$localconfig" | grep -Po '(?<=^zimbra_home = ).*$'`
 	jettyPath=$zimbraPath"/jetty"
 	installFolder=$zimbraPath"/2fa"
 
-To install do:
+To install, do:
 
 	#put install.zip in a temp folder, e.g. /tmp/install
 	unzip install.zip
