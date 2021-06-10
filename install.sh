@@ -12,7 +12,7 @@ echo "Setting environment variables";
 zimbraBinPath="/opt/zimbra/bin"
 localconfig=`$zimbraBinPath/zmlocalconfig -s`
 domain=`echo "$localconfig" | grep -Po '(?<=^zimbra_server_hostname = ).*$'`
-ldapDomain=`$zimbraBinPath/zmprov gad`
+ldapDomains=`$zimbraBinPath/zmprov gad`
 zimbraPath=`echo "$localconfig" | grep -Po '(?<=^zimbra_home = ).*$'`
 installFolder=$zimbraPath"/2fa"
 jettyPath=$zimbraPath"/jetty"
@@ -71,13 +71,14 @@ sudo -u $jettyUser install -d $zimbraBinPath"/lib/ext/singlepassword/"
 sudo -u $jettyUser unzip -o dist/zimbra-singlepassword-extension.zip
 sudo -u $jettyUser rsync -rt -i --delete zimbra-singlepassword-extension/ $zimbraPath"/lib/ext/singlepassword/"
 
-echo 'Activating single app password extension';
-sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$ldapDomain" zimbraAuthMech custom:singlepassword
-#optional
-#sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$domain" zimbraPasswordChangeListener singlepassword
-
-echo 'Disabling auth fall back to local';
-sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$ldapDomain" zimbraAuthFallbackToLocal FALSE
+for ldapDomain in $ldapDomains; do
+        echo "Activating single app password extension for $ldapDomain";
+        sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$ldapDomain" zimbraAuthMech custom:singlepassword
+        #optional
+        #sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$ldapDomain" zimbraPasswordChangeListener singlepassword
+        echo "Disabling auth fall back to local for $ldapDomain";
+        sudo -u $zimbraUser $zimbraBinPath"/zmprov" modifyDomain "$ldapDomain" zimbraAuthFallbackToLocal FALSE
+done
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart
