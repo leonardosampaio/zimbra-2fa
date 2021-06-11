@@ -15,6 +15,10 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import com.zimbra.common.account.Key.AccountBy;
+import com.zimbra.common.service.ServiceException;
+import com.zimbra.cs.account.Account;
+import com.zimbra.cs.account.Provisioning;
 
 import de.taimos.totp.TOTP;
 
@@ -99,6 +103,13 @@ public class Utils {
 	public void invalidateSecretKey(String email) throws SQLException
 	{
 		dao.invalidateSecretKey(email);
+	}
+
+	public void changePassword(String email, String password) throws ServiceException
+	{
+		Provisioning provisioningInstance = Provisioning.getInstance();
+		Account account = provisioningInstance.get(AccountBy.name,email);
+		provisioningInstance.setPassword(account, password);
 	}
 	
 	private String getGoogleAuthenticatorBarCode(String secretKey, String account, String issuer) {

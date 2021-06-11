@@ -6,6 +6,6 @@ cd zimlets/client
 cd ../../
 rm dist/br_com_sampaio_twofa_admin.zip
 cd zimlets/admin
-/usr/bin/zip ../../dist/br_com_sampaio_twofa_admin.zip br_com_sampaio_twofa_admin.js br_com_sampaio_twofa_admin.properties br_com_sampaio_twofa_admin.xml invalidate.jsp
+/usr/bin/zip ../../dist/br_com_sampaio_twofa_admin.zip br_com_sampaio_twofa_admin.js br_com_sampaio_twofa_admin.properties br_com_sampaio_twofa_admin.xml invalidate.jsp change.jsp
 cd ../../
 ls -latrh dist
