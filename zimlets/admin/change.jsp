@@ -2,11 +2,12 @@
 <%
 
 String status = "success";
+String email = null;
 
 try {
 	response.setContentType("application/json");
 
-	String email = request.getParameter("email");
+	email = request.getParameter("email");
 	String password = request.getParameter("password");
 
 	new Utils().changePassword(email,password);
@@ -18,4 +19,4 @@ catch (Exception e)
 }
 %>
 
-{"status":"<%=status%>"}
+{"status":"<%=status%>","email":"<%=email%>"}

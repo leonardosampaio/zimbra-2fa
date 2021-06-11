@@ -14,7 +14,7 @@
         var index = parseInt(keys[keys.length-1])+1;
         this._popupOperations[index] = new ZaOperation(index,
             "Set LDAP password", "Set internal LDAP password for user", "Properties", "PropertiesDis",
-            new AjxListener(this, br_com_sampaio_twofa_admin._changeDialog));
+            new AjxListener(this, br_com_sampaio_twofa_admin._changeListener));
     }
     
     if (ZaController.initPopupMenuMethods["ZaAccountListController"]) {
@@ -22,8 +22,6 @@
         ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initChangePopupButton);
     }
     
-    br_com_sampaio_twofa_admin._invalidateListenerLauncher = ZaAccountListController._invalidateListenerLauncher;
-
     br_com_sampaio_twofa_admin._invalidateListener =
     function(ev) {
         try {
@@ -40,7 +38,8 @@
             } else {
                 return;
             }
-            if (account){
+            if (account)
+            {
                 var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/invalidate.jsp';
 
                 var email = account.name;
@@ -60,42 +59,7 @@
         }
     }
 
-    br_com_sampaio_twofa_admin._changeDialog = 
-    function() {
-        var zimletInstance = this;
-            
-        zimletInstance.pView = new DwtComposite(zimletInstance.getShell());
-        zimletInstance.pView.setSize("650", "450");
-        zimletInstance.pView.getHtmlElement().style.overflow = "auto";
-        zimletInstance.pView.getHtmlElement().innerHTML = zimletInstance._createDialogView();
-
-        var standardButtons = [
-            DwtDialog.OK_BUTTON,
-            DwtDialog.CANCEL_BUTTON,	
-        ]
-
-        var dialogContents = {
-            title: 'Set LDAP password',
-            view:zimletInstance.pView,
-            parent:zimletInstance.getShell(),
-            standardButtons: standardButtons,
-            disposeOnPopDown: true
-        }
-            
-        zimletInstance.pbDialog = new ZmDialog(dialogContents);
-        zimletInstance.pbDialog.setButtonListener(DwtDialog.OK_BUTTON, new AjxListener(zimletInstance, zimletInstance._okBtnListener)); 
-        zimletInstance.pbDialog.setButtonListener(DwtDialog.CANCEL_BUTTON, new AjxListener(zimletInstance, zimletInstance._dismissBtnListener)); 
-        zimletInstance.pbDialog.popup();
-    };
-
-    br_com_sampaio_twofa_admin._createDialogView = 
-    function() {
-        var html = '<span>Password:</span></p>';
-        html += '<input type="text" name="password" id="password"/>';
-        return html;
-    }
-
-    br_com_sampaio_twofa_admin._okBtnListener =
+    br_com_sampaio_twofa_admin._changeListener =
     function(ev) {
         try {
             var account = null;
@@ -111,30 +75,43 @@
             } else {
                 return;
             }
-            if (account){
-                var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/change.jsp';
-
+            if (account)
+            {
                 var email = account.name;
-                var password = document.getElementById('password') ? document.getElementById('password').value : '';
+                var password = prompt("Enter new LDAP password for " + email, "");
+                if (password != null) {
 
-                var params = ('email='+email+'&password='+password);
+                    if (password == '')
+                    {
+                        alert('Error, empty password');
+                        return;
+                    }
 
-                var oReq = new XMLHttpRequest();
-                oReq.onload = function(){
-                    console.log('Set password response', JSON.parse(this.responseText));
-                    this.pbDialog.popdown();
-                };
-                oReq.open("post", jspUrl, true);
-                oReq.send(params);
+                    var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/change.jsp';
+
+                    var params = ('email='+email+'&password='+password);
+
+                    var oReq = new XMLHttpRequest();
+                    oReq.onload = function(){
+                        var json = JSON.parse(this.responseText);
+                        console.log('Set password response', json);
+                        if (json.status == 'success')
+                        {
+                            alert('LDAP password changed.\nThis may take up to 30 seconds to take effect.');
+                        }
+                        else {
+                            alert('Error setting LDAP password, try again.');
+                        }
+                        
+                    };
+                    oReq.open("post", jspUrl, true);
+                    oReq.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    oReq.send(params);
+                }
             }
     
         } catch (ex) {
-            this._handleException(ex, "br_com_sampaio_twofa_admin._okBtnListener", null, false);
+            this._handleException(ex, "br_com_sampaio_twofa_admin._changeListener", null, false);
         }
     }
-
-    br_com_sampaio_twofa_admin._dismissBtnListener =
-    function() {
-        this.pbDialog.popdown();
-    };
 }
