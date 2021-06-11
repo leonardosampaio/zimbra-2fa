@@ -1,59 +1,25 @@
-/*
- * ***** BEGIN LICENSE BLOCK *****
- * Zimbra Collaboration Suite Server
- * Copyright (C) 2011, 2012, 2013, 2014, 2016 Synacor, Inc.
- *
- * The contents of this file are subject to the Common Public Attribution License Version 1.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at: https://www.zimbra.com/license
- * The License is based on the Mozilla Public License Version 1.1 but Sections 14 and 15
- * have been added to cover use of software over a computer network and provide for limited attribution
- * for the Original Developer. In addition, Exhibit A has been modified to be consistent with Exhibit B.
- *
- * Software distributed under the License is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied.
- * See the License for the specific language governing rights and limitations under the License.
- * The Original Code is Zimbra Open Source Web Client.
- * The Initial Developer of the Original Code is Zimbra, Inc.  All rights to the Original Code were
- * transferred by Zimbra, Inc. to Synacor, Inc. on September 14, 2015.
- *
- * All portions of the code are Copyright (C) 2011, 2012, 2013, 2014, 2016 Synacor, Inc. All Rights Reserved.
- * ***** END LICENSE BLOCK *****
- */
-/**
- * Created by IntelliJ IDEA.
- * User: qinan
- * Date: 8/19/11
- * Time: 2:30 PM
- * To change this template use File | Settings | File Templates.
- */
  if(ZaSettings && ZaSettings.EnabledZimlet["br_com_sampaio_twofa_admin"]){
     br_com_sampaio_twofa_admin = function () {}
     
     br_com_sampaio_twofa_admin.initExtraPopupButton = function () {
-        this._popupOperations[ZaOperation.EDIT] = new ZaOperation(ZaOperation.EDIT,
+        var keys = Object.keys(this._popupOperations);
+        var index = parseInt(keys[keys.length-1])+1;
+        this._popupOperations[index] = new ZaOperation(index,
             "Invalidate 2FA", "Reset user two factor authentication configuration", "Properties", "PropertiesDis",
             new AjxListener(this, br_com_sampaio_twofa_admin._invalidateListener));
+    }
+
+    br_com_sampaio_twofa_admin.initChangePopupButton = function () {
+        var keys = Object.keys(this._popupOperations);
+        var index = parseInt(keys[keys.length-1])+1;
+        this._popupOperations[index] = new ZaOperation(index,
+            "Set LDAP password", "Set internal LDAP password for user", "Properties", "PropertiesDis",
+            new AjxListener(this, br_com_sampaio_twofa_admin._changeDialog));
     }
     
     if (ZaController.initPopupMenuMethods["ZaAccountListController"]) {
         ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
-    }
-    
-    if (ZaController.initPopupMenuMethods["ZaSearchListController"]) {
-        ZaController.initPopupMenuMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
-    }
-    
-    if (ZaController.initPopupMenuMethods["ZaAccountViewController"]) {
-        ZaController.initPopupMenuMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
-    }
-    
-    if (ZaController.initPopupMenuMethods["ZaDLController"]) {
-        ZaController.initPopupMenuMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
-    }
-    
-    if (ZaController.initPopupMenuMethods["ZaResourceController"]) {
-        ZaController.initPopupMenuMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.initExtraPopupButton);
+        ZaController.initPopupMenuMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.initChangePopupButton);
     }
     
     br_com_sampaio_twofa_admin._invalidateListenerLauncher = ZaAccountListController._invalidateListenerLauncher;
@@ -81,8 +47,6 @@
 
                 jspUrl += ('?email='+email);
 
-                console.log(jspUrl);
-
                 var oReq = new XMLHttpRequest();
                 oReq.onload = function(){
                     console.log('2fa invalidate response',JSON.parse(this.responseText));
@@ -95,116 +59,82 @@
             this._handleException(ex, "br_com_sampaio_twofa_admin._invalidateListener", null, false);
         }
     }
-    
-    br_com_sampaio_twofa_admin.changeActionsStateMethod =
-    function () {
-        var cnt, item;
-        if (this instanceof ZaAccountListController || this instanceof ZaSearchListController){
-            item = this._contentView.getSelection()[0];
-            cnt = this._contentView.getSelectionCount();
-        } else if (this instanceof ZaAccountViewController || this instanceof ZaDLController || this instanceof ZaResourceController){
-            item = this._currentObject;
-            cnt = 1;
-        }else {
-            return;
+
+    br_com_sampaio_twofa_admin._changeDialog = 
+    function() {
+        var zimletInstance = this;
+            
+        zimletInstance.pView = new DwtComposite(zimletInstance.getShell());
+        zimletInstance.pView.setSize("650", "450");
+        zimletInstance.pView.getHtmlElement().style.overflow = "auto";
+        zimletInstance.pView.getHtmlElement().innerHTML = zimletInstance._createDialogView();
+
+        var standardButtons = [
+            DwtDialog.OK_BUTTON,
+            DwtDialog.CANCEL_BUTTON,	
+        ]
+
+        var dialogContents = {
+            title: 'Set LDAP password',
+            view:zimletInstance.pView,
+            parent:zimletInstance.getShell(),
+            standardButtons: standardButtons,
+            disposeOnPopDown: true
         }
-    
-        if (cnt == 1) {
-            if (item) {
-    
-                if (item.type == ZaItem.ACCOUNT) {
-                    var enable = false;
-                    if(ZaZimbraAdmin.currentAdminAccount.attrs[ZaAccount.A_zimbraIsAdminAccount] == 'TRUE') {
-                        enable = true;
-                    } else if (AjxUtil.isEmpty(item.rights)) {
-                        item.loadEffectiveRights("id", item.id, false);
-                    }
-                    if(!enable) {
-                        if(!ZaItem.hasRight(ZaAccount.EDIT_RIGHT,item)) {
-                             if(this._popupOperations[ZaOperation.EDIT])
-                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
-                        }
-                    }
-                } else if ((item.type == ZaItem.ALIAS) && (item.attrs[ZaAlias.A_targetType] == ZaItem.ACCOUNT))  {
-                    if(!item.targetObj)
-                        item.targetObj = item.getAliasTargetObj() ;
-    
-                    var enable = false;
-                    if (ZaZimbraAdmin.currentAdminAccount.attrs[ZaAccount.A_zimbraIsAdminAccount] == 'TRUE') {
-                        enable = true;
-                    } else if (AjxUtil.isEmpty(item.targetObj.rights)) {
-                        item.targetObj.loadEffectiveRights("id", item.id, false);
-                    }
-                    if(!enable) {
-                        if(!ZaItem.hasRight(ZaAccount.EDIT_RIGHT,item.targetObj)) {
-                             if(this._popupOperations[ZaOperation.EDIT])
-                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
-                        }
-                    }
-                } else if ((item.type == ZaItem.ALIAS) && (item.attrs[ZaAlias.A_targetType] == ZaItem.RESOURCE))  {
-                    if(!item.targetObj)
-                        item.targetObj = item.getAliasTargetObj() ;
-    
-                    var enable = false;
-                    if (ZaZimbraAdmin.currentAdminAccount.attrs[ZaAccount.A_zimbraIsAdminAccount] == 'TRUE') {
-                        enable = true;
-                    } else if (AjxUtil.isEmpty(item.targetObj.rights)) {
-                        item.targetObj.loadEffectiveRights("id", item.id, false);
-                    }
-                    if(!enable) {
-                        if(!ZaItem.hasRight(ZaResource.VIEW_RESOURCE_MAIL_RIGHT,item.targetObj)) {
-                             if(this._popupOperations[ZaOperation.EDIT])
-                                this._popupOperations[ZaOperation.EDIT].enabled = false;
-                        }
-                    }
-                } else if(item.type == ZaItem.RESOURCE) {
-                    var enable = false;
-                    if(ZaZimbraAdmin.currentAdminAccount.attrs[ZaAccount.A_zimbraIsAdminAccount] == 'TRUE') {
-                        enable = true;
-                    } else if (AjxUtil.isEmpty(item.rights)) {
-                        item.loadEffectiveRights("id", item.id, false);
-                    }
-                    if(!enable) {
-                        if(!ZaItem.hasRight(ZaResource.VIEW_RESOURCE_MAIL_RIGHT,item)) {
-                             if(this._popupOperations[ZaOperation.EDIT]) {
-                                 this._popupOperations[ZaOperation.EDIT].enabled = false;
-                             }
-    
-                        }
-                    }
-                } else {
-                   if(this._popupOperations[ZaOperation.EDIT]) {
-                        this._popupOperations[ZaOperation.EDIT].enabled = false;
-                   }
+            
+        zimletInstance.pbDialog = new ZmDialog(dialogContents);
+        zimletInstance.pbDialog.setButtonListener(DwtDialog.OK_BUTTON, new AjxListener(zimletInstance, zimletInstance._okBtnListener)); 
+        zimletInstance.pbDialog.setButtonListener(DwtDialog.CANCEL_BUTTON, new AjxListener(zimletInstance, zimletInstance._dismissBtnListener)); 
+        zimletInstance.pbDialog.popup();
+    };
+
+    br_com_sampaio_twofa_admin._createDialogView = 
+    function() {
+        var html = '<span>Password:</span></p>';
+        html += '<input type="text" name="password" id="password"/>';
+        return html;
+    }
+
+    br_com_sampaio_twofa_admin._okBtnListener =
+    function(ev) {
+        try {
+            var account = null;
+            if (this instanceof ZaAccountListController || this instanceof ZaSearchListController){
+                var accounts = this._contentView.getSelection();
+                if(!accounts || accounts.length<=0) {
+                    return;
                 }
+                account = accounts[0];
     
+            } else if (this instanceof ZaAccountViewController || this instanceof ZaDLController || this instanceof ZaResourceController){
+                account = this._currentObject;
             } else {
-                if(this._popupOperations[ZaOperation.EDIT]) {
-                    this._popupOperations[ZaOperation.EDIT].enabled = false;
-                }
+                return;
             }
-        } else {
-            if(this._popupOperations[ZaOperation.EDIT]) {
-                this._popupOperations[ZaOperation.EDIT].enabled = false;
+            if (account){
+                var jspUrl = '/service/zimlet/br_com_sampaio_twofa_admin/change.jsp';
+
+                var email = account.name;
+                var password = document.getElementById('password') ? document.getElementById('password').value : '';
+
+                var params = ('email='+email+'&password='+password);
+
+                var oReq = new XMLHttpRequest();
+                oReq.onload = function(){
+                    console.log('Set password response', JSON.parse(this.responseText));
+                    this.pbDialog.popdown();
+                };
+                oReq.open("post", jspUrl, true);
+                oReq.send(params);
             }
+    
+        } catch (ex) {
+            this._handleException(ex, "br_com_sampaio_twofa_admin._okBtnListener", null, false);
         }
     }
-    if(ZaController.changeActionsStateMethods["ZaAccountListController"]) {
-        ZaController.changeActionsStateMethods["ZaAccountListController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
-    }
-    if(ZaController.changeActionsStateMethods["ZaSearchListController"]) {
-        ZaController.changeActionsStateMethods["ZaSearchListController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
-    }
-    
-    if(ZaController.changeActionsStateMethods["ZaAccountViewController"]) {
-        ZaController.changeActionsStateMethods["ZaAccountViewController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
-    }
-    if(ZaController.changeActionsStateMethods["ZaDLController"]) {
-        ZaController.changeActionsStateMethods["ZaDLController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
-    }
-    if(ZaController.changeActionsStateMethods["ZaResourceController"]) {
-        ZaController.changeActionsStateMethods["ZaResourceController"].push(br_com_sampaio_twofa_admin.changeActionsStateMethod);
-    }
-    
-    
-    }
+
+    br_com_sampaio_twofa_admin._dismissBtnListener =
+    function() {
+        this.pbDialog.popdown();
+    };
+}
