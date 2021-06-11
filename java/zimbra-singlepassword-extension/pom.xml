@@ -14,7 +14,7 @@
 
         <zimbra.version>8.8.15</zimbra.version>
 
-        <zimbra.lib.dir>${basedir}/lib</zimbra.lib.dir>
+        <zimbra.lib.dir>${basedir}/../lib</zimbra.lib.dir>
 
         <manifest.packageName>${project.groupId}</manifest.packageName>
         <manifest.zimbraExtensionClass>${manifest.packageName}.SinglePasswordExtension</manifest.zimbraExtensionClass>
