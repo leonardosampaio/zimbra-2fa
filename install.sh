@@ -82,10 +82,7 @@ done
 
 echo 'Restarting Zimbra';
 sudo -u $zimbraUser $zimbraBinPath"/zmcontrol" restart
+echo 'Done';
 
 #to disable custom auth
 #sudo -u zimbra /opt/zimbra/bin/zmprov modifyDomain "$domain" zimbraAuthMech zimbra
-
-#to set initial user web passwords:
-#sudo -u zimbra /opt/zimbra/bin/zmprov sp USER PASSWORD
-#users can change later in Options > Change Password
