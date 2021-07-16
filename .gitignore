@@ -7,3 +7,4 @@ entrega*
 .history
 !dist/.gitkeep
 install.zip
+vendor
