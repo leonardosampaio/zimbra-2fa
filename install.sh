@@ -33,6 +33,9 @@ then
         exit;
 fi
 
+echo "Installing rsync"
+apt install -y rsync
+
 date=$(date '+%Y-%m-%d')
 randomPassword=`date +%s | sha256sum | base64 | head -c 32 ; echo`
 
