@@ -8,3 +8,4 @@ entrega*
 !dist/.gitkeep
 install.zip
 vendor
+.vscode
