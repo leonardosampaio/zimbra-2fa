@@ -4,3 +4,6 @@ target
 .project
 .settings
 entrega*
+.history
+!dist/.gitkeep
+install.zip
