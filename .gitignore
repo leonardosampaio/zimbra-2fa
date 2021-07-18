@@ -9,3 +9,4 @@ entrega*
 install.zip
 vendor
 .vscode
+composer.lock
