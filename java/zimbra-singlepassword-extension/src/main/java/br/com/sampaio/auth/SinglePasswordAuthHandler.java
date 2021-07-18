@@ -32,20 +32,27 @@ public class SinglePasswordAuthHandler extends ZimbraCustomAuth {
 			String contextProtocol = 
 				context != null && context.get("proto") != null ? context.get("proto").toString() : null;
 			
+			ZimbraLog.account.info("[SinglePasswordAuthHandler] contextProtocol: %s", contextProtocol);
+
 			ProtocolType protocol = ProtocolType.getByDescription(contextProtocol);
+
+			ZimbraLog.account.info("[SinglePasswordAuthHandler] protocol: %s", protocol.toString());
 
 			if (protocol.equals(ProtocolType.SOAP))
 			{
 				String userAgent = 
 					context.get("ua") != null ? context.get("ua").toString() : null;
 
-				String clientIp = 
-					context.get("ocip") != null ? context.get("ocip").toString() : null;
+				ZimbraLog.account.info("[SinglePasswordAuthHandler] userAgent: %s", userAgent);
 
 				// AuthContext.Protocol doesn't have SMTP mapped
-				protocol = userAgent == null && clientIp == null ? 
-					ProtocolType.SMTP :
-					ProtocolType.OTHER;	
+				protocol = ProtocolType.OTHER;
+				if (userAgent == null)
+				{
+					protocol = ProtocolType.SMTP;
+				}
+
+				ZimbraLog.account.info("[SinglePasswordAuthHandler] considering SOAP protocol as: %s", protocol.toString());
 			}
 			
 			//empty for non-2fa users
