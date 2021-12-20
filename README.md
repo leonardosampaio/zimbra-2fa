@@ -1,7 +1,6 @@
 ## Zimbra 2FA
  
 **Leonardo Sampaio - Upwork - 2021-05-29
-leonardors@gmail.com**
 
 ### Installation
 
