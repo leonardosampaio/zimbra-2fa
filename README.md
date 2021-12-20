@@ -1,6 +1,6 @@
 ## Zimbra 2FA
  
-**Leonardo Sampaio - Upwork - 2021-05-29
+Upwork - 2021-05-29
 
 ### Installation
 
