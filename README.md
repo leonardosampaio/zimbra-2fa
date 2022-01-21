@@ -1,6 +1,6 @@
 ## Zimbra 2FA
- 
-Upwork - 2021-05-29
+
+A two factor authentication implementation using client zimlet and a jar extension.
 
 ### Installation
 
