@@ -45,7 +45,10 @@ sudo chown -R $zimbraUser:$zimbraUser $installFolder
 
 echo 'Creating database';
 sed -ie "s/CHANGETHIS/$randomPassword/g" sql/create.sql
-sudo -u $mysqlUser $zimbraBinPath"/mysql" -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < sql/create.sql
+for script in sql/*.sql; do
+        echo "Running $script"
+        sudo -u $mysqlUser $zimbraBinPath"/mysql" -u $mysqlRootUser -p$mysqlRootPassword $mysqlZimbraDb < $script
+done
 
 echo 'Copying 2fa jar library';
 sudo -u $jettyUser cp -R dist/2fa-1.0.jar $jettyCommonLibDir
