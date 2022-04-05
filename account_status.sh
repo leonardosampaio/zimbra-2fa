@@ -20,7 +20,7 @@ mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
 
 #######################################################################################
 
-echo 'Listing the status of each account';
+echo 'Listing 2fa status of each account';
 
 for ldapDomain in $ldapDomains; do
         printf "\nDomain: $ldapDomain\n";
