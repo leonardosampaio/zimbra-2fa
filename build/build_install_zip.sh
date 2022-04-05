@@ -9,5 +9,6 @@ rm install.zip
     jsp/login.8.8.15.2fa.jsp \
     sql \
     install.sh \
-    README.md
+    README.md \
+    account_status.sh
 ls -latrh install.zip
