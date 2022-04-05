@@ -50,7 +50,25 @@ function() {
 
 	var email = ZmZimletBase.prototype.getUsername();
 
-	jspUrl += ('?email='+email);
+	drawModal(zimletInstance.pbDialog, jspUrl, email);
+
+};
+
+function setOkLabel(label)
+{
+	document.querySelectorAll('.DwtDialogTitle').forEach(function(d) {
+		if (d.innerText == 'Configure 2FA')
+		{
+			d.parentElement.parentElement.parentElement.parentElement.parentElement
+				.querySelector('.ZWidgetTitle').textContent = label;
+		}
+	});
+}
+
+
+function drawModal(dialog, jspUrl, email)
+{
+	jspUrl += ('?email=' + email + '&reactivate=' + dialog.reactivate);
 
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function()
@@ -61,14 +79,15 @@ function() {
 		{
 			document.getElementById('divError').innerHTML = '';
 			document.getElementById('divError').style.display = "none";
-	
+
 			document.getElementById('divCode').style.display = "block";
 			var img = '<span>Scan this QrCode with your 2FA application (e.g., Google Authenticator):</span><br>';
 			img += '<img src="data:image/png;base64, '+json.qrcode+'" alt="2FA QrCode" />';
 			document.getElementById('divQrCode').innerHTML = img;
-			zimletInstance.pbDialog.setButtonVisible(DwtDialog.OK_BUTTON, true);
+			dialog.setButtonVisible(DwtDialog.OK_BUTTON, true);
 		}
-		else {
+		else
+		{
 			//already validated
 			document.getElementById('divQrCode').innerHTML = '';
 			document.getElementById('divCode').style.display = "none";
@@ -76,18 +95,21 @@ function() {
 			var error = '<span style="">2FA already configured</span>'
 			document.getElementById('divError').innerHTML = error;
 			document.getElementById('divError').style.display = "block";
-			zimletInstance.pbDialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
+
+			setOkLabel('New activation');
 
 			document.getElementById('divSingleAppPassword').style.display = "block";
 			document.getElementById('divSingleAppPassword').style.textAlign = "center";
 			var singleAppPassword = '<br><span>Use this single app password in your mail client:</span></p>';
 			singleAppPassword += '<input type="text" name="singleAppPassword" id="singleAppPassword" value="'+json.singleAppPassword+'" disabled size=8/>';
 			document.getElementById('divSingleAppPassword').innerHTML = singleAppPassword;
+
+			dialog.reactivate = true;
 		}
 	};
 	oReq.open("get", jspUrl, true);
 	oReq.send();
-};
+}
 
 br_com_sampaio_twofa_client_HandlerObject.prototype._createDialogView = 
 function() {
@@ -105,15 +127,29 @@ function() {
 br_com_sampaio_twofa_client_HandlerObject.prototype._okBtnListener =
 function() {
 
-	var jspUrl = this.getResource("validate.jsp");
-
+	var jspUrl = null;
+	var dialog = this.pbDialog;
 	var email = ZmZimletBase.prototype.getUsername();
+
+	if (dialog.reactivate)
+	{
+		document.getElementById('divSingleAppPassword').style.display = "none";
+
+		jspUrl = this.getResource("qrcode.jsp");
+		drawModal(dialog, jspUrl, email);
+		
+		setOkLabel('OK');
+		dialog.reactivate = false;
+
+		return;
+	}
+
+	jspUrl = this.getResource("validate.jsp");
+
 	var code = document.getElementById('code') ? document.getElementById('code').value : '';
 
 	jspUrl += ('?email='+email);
 	jspUrl += ('&code='+code);
-
-	var dialog = this.pbDialog;
 
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function()
@@ -125,6 +161,10 @@ function() {
 			error = '<br><span style="font-weight: bold;">Error: Invalid code, try again</span>';
 		}
 		else {
+
+			document.getElementById('divCode').style.display = "none";
+			document.getElementById('divQrCode').style.display = "none";
+
 			error = '<br><span style="">Success, 2FA configured!</span>';
 			
 			document.getElementById('divSingleAppPassword').style.display = "block";

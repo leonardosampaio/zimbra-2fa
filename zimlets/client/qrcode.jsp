@@ -6,6 +6,7 @@ response.setContentType("application/json");
 Utils utils = new Utils();
 
 String email = request.getParameter("email");
+String reactivate = request.getParameter("reactivate");
 String companyName = "Zimbra 2FA "+email.split("@")[1];
 
 String b64Png = "";
@@ -24,7 +25,7 @@ else {
 
 try
 {
-    if (!utils.hasValidSecretKey(email))
+    if (reactivate.equals("true") || !utils.hasValidSecretKey(email))
     {
         b64Png = utils.getQrCodeB64(companyName, email, 300, 300);
         status = "pending";

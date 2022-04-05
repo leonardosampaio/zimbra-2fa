@@ -20,12 +20,13 @@ else {
 	instance = (SinglePasswordTempStore)request.getServletContext().getAttribute("singlePasswordTempStore");
 }
 
-String singleAppPassword = instance.getPassword(email);
+String singleAppPassword = "";
 
 try
 {
-    if (!utils.hasValidSecretKey(email) && utils.validateCode(email, code))
+    if (utils.validateCode(email, code))
     {
+        singleAppPassword = instance.getPassword(email);
         status = "validated";
     }   
 }

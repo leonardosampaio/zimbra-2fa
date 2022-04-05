@@ -78,16 +78,23 @@ public class Utils {
 	 */
 	public boolean validateCode(String email, String code) throws SQLException
 	{
-		SecretKeyWrapper wrapper = dao.getSecretKey(email);
-		boolean valid = code.equals(getTOTPCode(wrapper.getSecretKey()));
-		
-		if (valid && !wrapper.isValidated())
-		{
-			//From this point secretKey should change only if admin zimlet calls invalidateSecretKey
-			dao.validateSecretKey(email, wrapper.getSecretKey());
+		for (SecretKeyWrapper wrapper : dao.getSecretKey(email)) {
+			
+			boolean valid = code.equals(getTOTPCode(wrapper.getSecretKey()));
+
+			if (valid && !wrapper.isValidated())
+			{
+				//From this point secretKey should change only if admin zimlet calls invalidateSecretKey
+				dao.validateSecretKey(email, wrapper.getSecretKey());
+			}
+
+			if (valid)
+			{
+				return true;
+			}
 		}
 		
-		return valid;
+		return false;
 	}
 	
 	/**

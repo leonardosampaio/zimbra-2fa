@@ -59,23 +59,19 @@ public class ClientDao {
 	
 	public void putSecretKey(String email, String secretKey) throws SQLException
 	{
-		String sql = "insert into clients (email,secret_key,validated) values (?,?,false)"
-				+ " on duplicate key update secret_key = ?, validated = false";
+		String sql = "insert into clients (email,secret_key,validated) values (?,?,false)";
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
 		preparedStatement.setString(1, email);
 		preparedStatement.setString(2, secretKey);
-		preparedStatement.setString(3, secretKey);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
 		this.closeConnection();
 	}
 	
-	public SecretKeyWrapper getSecretKey(String email) throws SQLException
+	public List<SecretKeyWrapper> getSecretKey(String email) throws SQLException
 	{
-		SecretKeyWrapper result = null;
-		
 		String sql = "select secret_key, validated from clients "
 				+ "where (lower(email) = ? or "
 				+ "lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?)";
@@ -85,11 +81,12 @@ public class ClientDao {
 		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
-		if (resultSet.next())
+		List<SecretKeyWrapper> result = new ArrayList<>();
+		while (resultSet.next())
 		{
-			result = new SecretKeyWrapper(
+			result.add(new SecretKeyWrapper(
 					resultSet.getString("secret_key"),
-					resultSet.getBoolean("validated"));
+					resultSet.getBoolean("validated")));
 		}
 		
 		resultSet.close();

@@ -1,0 +1,1 @@
+alter table 2fa.clients drop index email;

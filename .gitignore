@@ -10,3 +10,4 @@ install.zip
 vendor
 .vscode
 composer.lock
+*.mp4
