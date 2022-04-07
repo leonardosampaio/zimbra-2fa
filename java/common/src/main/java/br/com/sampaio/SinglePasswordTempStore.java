@@ -54,7 +54,7 @@ public class SinglePasswordTempStore {
         
     	if (password == null || isSinglePasswordInUse(email, password))
     	{
-            password = new RandomString(8, ThreadLocalRandom.current()).nextString();
+            password = new RandomString(16, ThreadLocalRandom.current()).nextString();
     		String bcryptHashString = BCrypt.withDefaults().hashToString(12, password.toCharArray());
     		new ClientDao().putSingleAppPasswordHash(email, bcryptHashString);
     		tempStore.put(email, password);

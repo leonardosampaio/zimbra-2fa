@@ -101,7 +101,7 @@ function drawModal(dialog, jspUrl, email)
 			document.getElementById('divSingleAppPassword').style.display = "block";
 			document.getElementById('divSingleAppPassword').style.textAlign = "center";
 			var singleAppPassword = '<br><span>Use this single app password in your mail client:</span></p>';
-			singleAppPassword += '<input type="text" name="singleAppPassword" id="singleAppPassword" value="'+json.singleAppPassword+'" disabled size=8/>';
+			singleAppPassword += '<input type="text" name="singleAppPassword" id="singleAppPassword" value="'+json.singleAppPassword+'" size="16" disabled>';
 			document.getElementById('divSingleAppPassword').innerHTML = singleAppPassword;
 
 			dialog.reactivate = true;
@@ -170,7 +170,7 @@ function() {
 			document.getElementById('divSingleAppPassword').style.display = "block";
 			document.getElementById('divSingleAppPassword').style.textAlign = "center";
 			var singleAppPassword = '<br><span>Use this single app password in your mail client:</span></p>';
-			singleAppPassword += '<input type="text" name="singleAppPassword" id="singleAppPassword" value="'+json.singleAppPassword+'" disabled size=8/>';
+			singleAppPassword += '<input type="text" name="singleAppPassword" id="singleAppPassword" value="'+json.singleAppPassword+'" size="16" disabled>';
 			document.getElementById('divSingleAppPassword').innerHTML = singleAppPassword;
 
 			dialog.setButtonVisible(DwtDialog.OK_BUTTON, false);
