@@ -13,7 +13,8 @@
 <%
 Utils utils = new Utils();
 
-String twofa = request.getParameter("2fa");
+String hostname = request.getServerName();
+String twofa    = request.getParameter("2fa");
 String username = request.getParameter("username");
 
 boolean activated = false;
@@ -21,7 +22,7 @@ boolean activated = false;
 if (username != null)
 {
 	try {
-		activated = utils.hasValidSecretKey(username);
+		activated = utils.hasValidSecretKey(hostname, username);
 	}
 	catch (Exception e)
 	{
@@ -30,7 +31,7 @@ if (username != null)
 	}
 }
 
-boolean validTwoFa = (!activated || (activated && twofa != null && !twofa.isEmpty() && utils.validateCode(username, twofa)));
+boolean validTwoFa = (!activated || (activated && twofa != null && !twofa.isEmpty() && utils.validateCode(hostname, username, twofa)));
 %>
 <c:set var="validTwoFa" value="<%=validTwoFa%>"/>
 <c:set var="twoFactorAuthError" value="Invalid two factor authentication code"/>

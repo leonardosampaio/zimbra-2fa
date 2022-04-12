@@ -64,10 +64,13 @@ md5=`/usr/bin/md5sum $jettyPath/webapps/zimbra/public/login.jsp | awk '{ print $
 sudo -u $jettyUser cp -R $jettyPath"/webapps/zimbra/public/login.jsp" $installFolder"/backup/$date-$md5-login.jsp"
 sudo -u $jettyUser cp -R jsp/login.8.8.15.2fa.jsp $jettyPath"/webapps/zimbra/public/login.jsp"
 
+read -p "Enter the domains that will use 2fa (e.g., zimbra_ldap_domain.com:https_domain.com zimbra_ldap_domain_2.com:https_domain_2.com): " domains;
 echo 'Copying 2fa configuration file';
 #if you need to change this, define environment variable 2FA_CONFIG_FILE_PATH, visible to Jetty server
 sudo -u $zimbraUser cp -R config/config.properties $installFolder"/config.properties"
 sudo -u $zimbraUser /bin/sed -i "s/^mysqlPassword=.*/mysqlPassword=$randomPassword/" $installFolder"/config.properties"
+sudo -u $zimbraUser /bin/sed -i "s/^domains=.*/domains=$domains/" $installFolder"/config.properties"
+echo "Configuration file created at $installFolder/config.properties"
 
 echo 'Activating jsp files in zimlets';
 sudo -u $zimbraUser $zimbraBinPath"/zmprov" ms "$domain" zimbraZimletJspEnabled TRUE

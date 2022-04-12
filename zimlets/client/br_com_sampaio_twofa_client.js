@@ -44,6 +44,7 @@ function() {
 	zimletInstance.pbDialog = new ZmDialog(dialogContents);
 	zimletInstance.pbDialog.setButtonListener(DwtDialog.OK_BUTTON, new AjxListener(zimletInstance, zimletInstance._okBtnListener)); 
 	zimletInstance.pbDialog.setButtonListener(DwtDialog.CANCEL_BUTTON, new AjxListener(zimletInstance, zimletInstance._dismissBtnListener)); 
+	zimletInstance.pbDialog.reactivate = false;
 	zimletInstance.pbDialog.popup();
 
 	var jspUrl = this.getResource("qrcode.jsp");

@@ -1,5 +1,6 @@
 CREATE DATABASE IF NOT EXISTS 2fa;
 CREATE USER IF NOT EXISTS '2fa_integration'@'localhost' IDENTIFIED BY 'CHANGETHIS';
+--if reinstalling, updates the password
 SET PASSWORD FOR '2fa_integration'@'localhost' = PASSWORD('CHANGETHIS');
 CREATE TABLE IF NOT EXISTS 2fa.clients (
 	id 			MEDIUMINT 	NOT NULL AUTO_INCREMENT,

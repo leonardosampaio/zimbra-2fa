@@ -30,13 +30,14 @@ public class Utils {
 	/**
 	 * Avoid resubmission of secretKey by client zimlet.
 	 * 
+	 * @param httpsDomain
 	 * @param email
 	 * @return
 	 * @throws SQLException 
 	 */
-	public boolean hasValidSecretKey(String email) throws SQLException
+	public boolean hasValidSecretKey(String httpsDomain, String email) throws SQLException
 	{
-		return dao.hasValidSecretKey(email);
+		return dao.hasValidSecretKey(httpsDomain, email);
 	}
 	
 	/**
@@ -71,21 +72,22 @@ public class Utils {
 	/**
 	 * Validate Google Authenticator code.
 	 * 
+	 * @param httpsDomain
 	 * @param code
 	 * @param secretKey
 	 * @return
 	 * @throws SQLException 
 	 */
-	public boolean validateCode(String email, String code) throws SQLException
+	public boolean validateCode(String httpsDomain, String email, String code) throws SQLException
 	{
-		for (SecretKeyWrapper wrapper : dao.getSecretKey(email)) {
+		for (SecretKeyWrapper wrapper : dao.getSecretKey(httpsDomain, email)) {
 			
 			boolean valid = code.equals(getTOTPCode(wrapper.getSecretKey()));
 
 			if (valid && !wrapper.isValidated())
 			{
 				//From this point secretKey should change only if admin zimlet calls invalidateSecretKey
-				dao.validateSecretKey(email, wrapper.getSecretKey());
+				dao.validateSecretKey(httpsDomain, email, wrapper.getSecretKey());
 			}
 
 			if (valid)

@@ -5,8 +5,9 @@ response.setContentType("application/json");
 
 Utils utils = new Utils();
 
-String email = request.getParameter("email");
-String code = request.getParameter("code");
+String hostname = request.getServerName();
+String email    = request.getParameter("email");
+String code     = request.getParameter("code");
 
 String status = "error";
 
@@ -24,7 +25,7 @@ String singleAppPassword = "";
 
 try
 {
-    if (utils.validateCode(email, code))
+    if (utils.validateCode(hostname, email, code))
     {
         singleAppPassword = instance.getPassword(email);
         status = "validated";
