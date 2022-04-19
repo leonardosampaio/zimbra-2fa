@@ -70,6 +70,18 @@ public class ClientDao {
 			conn.close();
 		}
 	}
+
+	private String correctEmail(String httpsDomain, String loginOrFullEmail)
+	{
+		if (loginOrFullEmail.contains("@"))
+		{
+			return loginOrFullEmail.toLowerCase();
+		}
+		
+		return loginOrFullEmail +
+			"@" +
+			(!this.domains.isEmpty() && this.domains.containsKey(httpsDomain.toLowerCase()) ? this.domains.get(httpsDomain.toLowerCase()) : "tirescue.co");
+	}
 	
 	public void putSecretKey(String email, String secretKey) throws SQLException
 	{
@@ -77,7 +89,7 @@ public class ClientDao {
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, email);
+		preparedStatement.setString(1, email.toLowerCase());
 		preparedStatement.setString(2, secretKey);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
@@ -88,15 +100,10 @@ public class ClientDao {
 	{
 		List<SecretKeyWrapper> result = new ArrayList<>();
 
-		if (this.domains.isEmpty() || !this.domains.containsKey(httpsDomain.toLowerCase()))
-		{
-			return result;
-		}
-
 		String sql = "select secret_key, validated from clients where lower(email) = ?";
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, loginOrFullEmail.toLowerCase().split("@")[0] + "@" + this.domains.get(httpsDomain.toLowerCase()));
+		preparedStatement.setString(1, this.correctEmail(httpsDomain, loginOrFullEmail));
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
 		while (resultSet.next())
@@ -120,7 +127,7 @@ public class ClientDao {
 		
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, loginOrFullEmail.toLowerCase().split("@")[0] + "@" + this.domains.get(httpsDomain.toLowerCase()));
+		preparedStatement.setString(1, this.correctEmail(httpsDomain, loginOrFullEmail));
 		preparedStatement.setString(2, secretKey);
 		preparedStatement.executeUpdate();
 		preparedStatement.close();
@@ -148,7 +155,7 @@ public class ClientDao {
 				+ "lower(email) = ? and validated = true";
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
-		preparedStatement.setString(1, loginOrFullEmail.toLowerCase().split("@")[0] + "@" + this.domains.get(httpsDomain.toLowerCase()));
+		preparedStatement.setString(1, this.correctEmail(httpsDomain, loginOrFullEmail));
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
 		if (resultSet.next())
@@ -231,13 +238,11 @@ public class ClientDao {
 		boolean result = false;
 		
 		String sql = "select in_use from single_app_password where "
-				+ "(lower(email) = ? or lower(SUBSTR(email,1,LOCATE('@',email)-1)) = ?) "
-				+ "and hash = ?";
+				+ "lower(email) = ? and hash = ?";
 		this.openConnection();
 		PreparedStatement preparedStatement = conn.prepareStatement(sql);
 		preparedStatement.setString(1, email.toLowerCase());
-		preparedStatement.setString(2, email.toLowerCase().split("@")[0]);
-		preparedStatement.setString(3, hash);
+		preparedStatement.setString(2, hash);
 		ResultSet resultSet = preparedStatement.executeQuery();
 		
 		if (resultSet.next())

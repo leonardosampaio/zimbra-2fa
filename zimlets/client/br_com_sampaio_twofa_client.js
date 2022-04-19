@@ -76,7 +76,11 @@ function drawModal(dialog, jspUrl, email)
 	{
 		var json = JSON.parse(this.responseText);
 	
-		if (json.status == 'pending')
+		if (json.status == 'error')
+		{
+			alert('Error generating QrCode');
+		}
+		else if (json.status == 'pending')
 		{
 			document.getElementById('divError').innerHTML = '';
 			document.getElementById('divError').style.display = "none";
