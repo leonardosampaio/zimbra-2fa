@@ -23,7 +23,7 @@ jettyCommonLibDir=$jettyPath"/common/lib"
 
 zimbraUser=zimbra
 jettyUser=`stat -c '%U' $jettyCommonLibDir`
-mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }'`
+mysqlUser=`ps -ef | grep mysql.sock | grep -v grep | awk '{ print $1 }' | head -n 1`
 
 #######################################################################################
 
@@ -67,6 +67,7 @@ sudo -u $jettyUser cp -R jsp/login.8.8.15.2fa.jsp $jettyPath"/webapps/zimbra/pub
 read -p "Enter the domains that will use 2fa (e.g., zimbra_ldap_domain.com:https_domain.com zimbra_ldap_domain_2.com:https_domain_2.com): " domains;
 echo 'Copying 2fa configuration file';
 #if you need to change this, define environment variable 2FA_CONFIG_FILE_PATH, visible to Jetty server
+sudo -u $zimbraUser rm -R $installFolder"/config.properties"
 sudo -u $zimbraUser cp -R config/config.properties $installFolder"/config.properties"
 sudo -u $zimbraUser /bin/sed -i "s/^mysqlPassword=.*/mysqlPassword=$randomPassword/" $installFolder"/config.properties"
 sudo -u $zimbraUser /bin/sed -i "s/^domains=.*/domains=$domains/" $installFolder"/config.properties"
