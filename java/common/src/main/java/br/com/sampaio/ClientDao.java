@@ -80,7 +80,8 @@ public class ClientDao {
 		
 		return loginOrFullEmail +
 			"@" +
-			(!this.domains.isEmpty() && this.domains.containsKey(httpsDomain.toLowerCase()) ? this.domains.get(httpsDomain.toLowerCase()) : "tirescue.co");
+			(!this.domains.isEmpty() && this.domains.containsKey(httpsDomain.toLowerCase()) ?
+				this.domains.get(httpsDomain.toLowerCase()) : httpsDomain);
 	}
 	
 	public void putSecretKey(String email, String secretKey) throws SQLException
