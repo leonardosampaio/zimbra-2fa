@@ -83,6 +83,7 @@ public class Utils {
 		for (SecretKeyWrapper wrapper : dao.getSecretKey(httpsDomain, email)) {
 			
 			boolean valid = wrapper.getSecretKey() != null &&
+							!wrapper.getSecretKey().isEmpty() &&
 							code.equals(getTOTPCode(wrapper.getSecretKey()));
 
 			if (valid && !wrapper.isValidated())
